@@ -27,9 +27,18 @@ class FreehandRasterGeoreferencerDialog(QDialog,
         self.setupUi(self)
 
         self.pushButtonBrowse.clicked.connect(self.showBrowserDialog)
+        self.checkBoxUseScale.clicked.connect(self.setUseScale)
 
     def clear(self):
         self.lineEditImagePath.setText("")
+        self.checkBoxUseScale.setChecked(False)
+        self.doubleSpinBoxScale.setEnabled(False)
+        self.doubleSpinBoxDPI.setEnabled(False)
+
+    def setUseScale(self):
+        state = self.checkBoxUseScale.isChecked()
+        self.doubleSpinBoxScale.setEnabled(state)
+        self.doubleSpinBoxDPI.setEnabled(state)
 
     def showBrowserDialog(self):
         bDir, found = QgsProject.instance().readEntry(

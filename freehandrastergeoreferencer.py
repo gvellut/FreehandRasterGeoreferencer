@@ -245,11 +245,12 @@ class FreehandRasterGeoreferencer(object):
 
         imageName = os.path.basename(imagePath)
         imageName, _ = os.path.splitext(imageName)
-
         screenExtent = self.iface.mapCanvas().extent()
+        useScale = self.dialogAddLayer.checkBoxUseScale.isChecked()
+        scale = self.dialogAddLayer.doubleSpinBoxScale.value()
+        dpi = self.dialogAddLayer.doubleSpinBoxDPI.value()
 
-        layer = FreehandRasterGeoreferencerLayer(
-            self, imagePath, imageName, screenExtent)
+        layer = FreehandRasterGeoreferencerLayer(self, imagePath , imageName, screenExtent, useScale, scale, dpi)
         if layer.isValid():
             QgsProject.instance().addMapLayer(layer)
             self.layers[layer.id()] = layer

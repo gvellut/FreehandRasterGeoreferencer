@@ -34,7 +34,7 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
 
     LAYER_TYPE = "FreehandRasterGeoreferencerLayer"
 
-    def __init__(self, plugin, filepath, title, screenExtent):
+    def __init__(self, plugin, filepath, title, screenExtent, useScale, scale, dpi):
         QgsPluginLayer.__init__(
             self, FreehandRasterGeoreferencerLayer.LAYER_TYPE, title)
         self.plugin = plugin
@@ -57,6 +57,10 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
         self.rotation = 0.0
         self.xScale = 1.0
         self.yScale = 1.0
+
+        self.useScale = useScale
+        self.scale = scale
+        self.dpi = dpi
 
         self.error = False
         self.initializing = False
@@ -278,10 +282,15 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
                 georef[5] == 1)
 
     def resetScale(self, sw, sh):
-        iw = self.image.width()
-        ih = self.image.height()
-        wratio = sw / iw
-        hratio = sh / ih
+        if self.useScale:
+            meter_per_inch = 0.0254
+            wratio = self.scale * meter_per_inch / self.dpi
+            hratio = self.scale * meter_per_inch / self.dpi
+        else:
+            iw = self.image.width()
+            ih = self.image.height()
+            wratio = sw / iw
+            hratio = sh / ih
 
         if wratio > hratio:
             # takes all height of current extent
@@ -544,7 +553,7 @@ class FreehandRasterGeoreferencerLayerType(QgsPluginLayerType):
         self.plugin = plugin
 
     def createLayer(self):
-        return FreehandRasterGeoreferencerLayer(self.plugin, None, "", None)
+        return FreehandRasterGeoreferencerLayer(self.plugin, None, "", None, None, None, None)
 
     def showLayerProperties(self, layer):
         from .propertiesdialog import PropertiesDialog
