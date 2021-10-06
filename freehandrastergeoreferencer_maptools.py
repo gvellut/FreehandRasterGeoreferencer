@@ -815,3 +815,104 @@ class GeorefRasterBy2PointsMapTool(QgsMapToolEmitPoint):
         x = point.x() + self.endPoint.x() - self.startPoint.x()
         y = point.y() + self.endPoint.y() - self.startPoint.y()
         self.rubberBandExtent.addPoint(QgsPointXY(x, y), doUpdate)
+
+class SelectNorthMapTool(QgsMapToolEmitPoint):
+    def __init__(self, iface):
+        self.iface = iface
+        self.canvas = iface.mapCanvas()
+        QgsMapToolEmitPoint.__init__(self, self.canvas)
+
+        self.rasterShadow = RasterShadowMapCanvasItem(self.canvas)
+
+        self.firstPoint = None
+        self.secondPoint = None
+
+        # Marker for the starting point
+        self.rubberBandOriginPoint = QgsRubberBand(self.canvas, QgsWkbTypes.PointGeometry)
+        self.rubberBandOriginPoint.setColor(Qt.red)
+        self.rubberBandOriginPoint.setIcon(QgsRubberBand.ICON_X)
+        self.rubberBandOriginPoint.setIconSize(7)
+        self.rubberBandOriginPoint.setWidth(2)
+
+        # Line for the North Line
+        self.rubberBandLine = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
+        self.rubberBandLine.setColor(Qt.red)
+        self.rubberBandLine.setWidth(1)
+
+        self.isLayerVisible = True
+
+        self.reset()
+
+    def setLayer(self, layer):
+        self.layer = layer
+
+    def reset(self):
+        self.secondPoint = self.firstPoint = None
+        self.isEmittingPoint = False
+        self.rubberBandOriginPoint.reset(QgsWkbTypes.PointGeometry)
+        self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
+        self.layer = None
+
+    def deactivate(self):
+        QgsMapToolEmitPoint.deactivate(self)
+        self.reset()
+
+    def canvasPressEvent(self, e):
+        self.firstPoint = self.toMapCoordinates(e.pos())
+        self.isEmittingPoint = True
+
+        # Set the starting point marker to the first position and show
+        self.rubberBandOriginPoint.reset(QgsWkbTypes.PointGeometry)
+        self.rubberBandOriginPoint.addPoint(self.firstPoint, True)
+        self.rubberBandOriginPoint.show()
+
+        self.layer.history.append(
+        {
+            "action": "rotation",
+            "rotation": self.layer.rotation,
+            "center": self.layer.center,
+        })
+
+    def canvasReleaseEvent(self, e):
+        self.isEmittingPoint = False
+        self.secondPoint = self.toMapCoordinates(e.pos())
+
+        # Calculate the clockwise azimuth with 0 being North
+        # self.firstPoint is a QgsPoint which has an azimuth function
+        # Will probably need to convert an azimuth into map rotation
+        #     where East is 0 and counter-clockwise is positive.
+        azimuth = -self.firstPoint.azimuth(self.secondPoint)
+        #val = self.layer.rotation + rotation
+        #self.layer.setRotation(self.computeRotation(self.firstPoint, self.secondPoint) + self.layer.rotation)
+        self.layer.setRotation(azimuth + self.layer.rotation)
+
+        self.layer.repaint()
+
+        self.layer.commitTransformParameters()
+
+        self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
+        self.rubberBandOriginPoint.reset(QgsWkbTypes.PointGeometry)
+        self.rasterShadow.reset()
+
+        self.firstPoint = self.secondPoint = None
+
+    def canvasMoveEvent(self, e):
+        if not self.isEmittingPoint:
+            return
+
+        self.secondPoint = self.toMapCoordinates(e.pos())
+        self.showDisplacement(self.firstPoint, self.secondPoint)
+
+    def computeRotation(self, startPoint, endPoint):
+        #return math.degrees(math.atan2(endPoint.y(), endPoint.x()) - math.atan2(startPoint.y(), startPoint.x()))
+        return math.degrees(math.atan2(-(endPoint.y() - startPoint.y()), endPoint.x() - startPoint.x()))
+        #    dX = self.endPoint.x() - self.startPoint.x()
+        #    dY = self.endPoint.y() - self.startPoint.y()
+        #    return math.degrees(math.atan2(-dY, dX))
+
+
+    def showDisplacement(self, startPoint, endPoint):
+        self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
+        self.rubberBandLine.addPoint(startPoint, False)
+        self.rubberBandLine.addPoint(endPoint, True)  # true to update canvas
+        self.rubberBandLine.show()
