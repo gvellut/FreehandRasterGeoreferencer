@@ -29,6 +29,7 @@ from .freehandrastergeoreferencer_maptools import (
     MoveRasterMapTool,
     RotateRasterMapTool,
     ScaleRasterMapTool,
+    SelectNorthMapTool,
 )
 from .freehandrastergeoreferencerdialog import FreehandRasterGeoreferencerDialog
 
@@ -77,6 +78,15 @@ class FreehandRasterGeoreferencer(object):
         )
         self.actionRotateRaster.triggered.connect(self.rotateRaster)
         self.actionRotateRaster.setCheckable(True)
+
+        self.actionSelectNorth = QAction(
+            QIcon(":/plugins/freehandrastergeoreferencer/iconSelectNorth.png"),
+            "Select North",
+            self.iface.mainWindow())
+        self.actionSelectNorth.setObjectName(
+            "FreehandRasterGeoreferencingLayerPlugin_SelectNorth")
+        self.actionSelectNorth.triggered.connect(self.selectNorth)
+        self.actionSelectNorth.setCheckable(True)
 
         self.actionScaleRaster = QAction(
             QIcon(":/plugins/freehandrastergeoreferencer/iconScale.png"),
@@ -170,6 +180,7 @@ class FreehandRasterGeoreferencer(object):
         self.toolbar.addAction(self.actionAddLayer)
         self.toolbar.addAction(self.actionMoveRaster)
         self.toolbar.addAction(self.actionRotateRaster)
+        self.toolbar.addAction(self.actionSelectNorth)
         self.toolbar.addWidget(self.spinBoxRotate)
         self.toolbar.addAction(self.actionScaleRaster)
         self.toolbar.addAction(self.actionAdjustRaster)
@@ -190,6 +201,8 @@ class FreehandRasterGeoreferencer(object):
         self.moveTool.setAction(self.actionMoveRaster)
         self.rotateTool = RotateRasterMapTool(self.iface)
         self.rotateTool.setAction(self.actionRotateRaster)
+        self.selectNorthTool = SelectNorthMapTool(self.iface)
+        self.selectNorthTool.setAction(self.actionSelectNorth)
         self.scaleTool = ScaleRasterMapTool(self.iface)
         self.scaleTool.setAction(self.actionScaleRaster)
         self.adjustTool = AdjustRasterMapTool(self.iface)
@@ -236,6 +249,7 @@ class FreehandRasterGeoreferencer(object):
         ):
             self.actionMoveRaster.setEnabled(True)
             self.actionRotateRaster.setEnabled(True)
+            self.actionSelectNorth.setEnabled(True)
             self.actionScaleRaster.setEnabled(True)
             self.actionAdjustRaster.setEnabled(True)
             self.actionGeoref2PRaster.setEnabled(True)
@@ -261,6 +275,7 @@ class FreehandRasterGeoreferencer(object):
         else:
             self.actionMoveRaster.setEnabled(False)
             self.actionRotateRaster.setEnabled(False)
+            self.actionSelectNorth.setEnabled(False)
             self.actionScaleRaster.setEnabled(False)
             self.actionAdjustRaster.setEnabled(False)
             self.actionGeoref2PRaster.setEnabled(False)
@@ -338,6 +353,9 @@ class FreehandRasterGeoreferencer(object):
 
     def rotateRaster(self):
         self._toggleTool(self.rotateTool)
+
+    def selectNorth(self):
+        self._toggleTool(self.selectNorthTool)
 
     def scaleRaster(self):
         self._toggleTool(self.scaleTool)
