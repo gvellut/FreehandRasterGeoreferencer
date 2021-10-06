@@ -877,13 +877,7 @@ class SelectNorthMapTool(QgsMapToolEmitPoint):
         self.isEmittingPoint = False
         self.secondPoint = self.toMapCoordinates(e.pos())
 
-        # Calculate the clockwise azimuth with 0 being North
-        # self.firstPoint is a QgsPoint which has an azimuth function
-        # Will probably need to convert an azimuth into map rotation
-        #     where East is 0 and counter-clockwise is positive.
         azimuth = -self.firstPoint.azimuth(self.secondPoint)
-        #val = self.layer.rotation + rotation
-        #self.layer.setRotation(self.computeRotation(self.firstPoint, self.secondPoint) + self.layer.rotation)
         self.layer.setRotation(azimuth + self.layer.rotation)
 
         self.layer.repaint()
@@ -902,14 +896,6 @@ class SelectNorthMapTool(QgsMapToolEmitPoint):
 
         self.secondPoint = self.toMapCoordinates(e.pos())
         self.showDisplacement(self.firstPoint, self.secondPoint)
-
-    def computeRotation(self, startPoint, endPoint):
-        #return math.degrees(math.atan2(endPoint.y(), endPoint.x()) - math.atan2(startPoint.y(), startPoint.x()))
-        return math.degrees(math.atan2(-(endPoint.y() - startPoint.y()), endPoint.x() - startPoint.x()))
-        #    dX = self.endPoint.x() - self.startPoint.x()
-        #    dY = self.endPoint.y() - self.startPoint.y()
-        #    return math.degrees(math.atan2(-dY, dX))
-
 
     def showDisplacement(self, startPoint, endPoint):
         self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
