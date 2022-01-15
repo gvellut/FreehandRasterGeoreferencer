@@ -152,6 +152,7 @@ class FreehandRasterGeoreferencer(object):
             FreehandRasterGeoreferencer.PLUGIN_MENU, self.actionAddLayer
         )
 
+        # create rotation value input field in toolbar
         self.spinBoxRotate = QDoubleSpinBox(self.iface.mainWindow())
         self.spinBoxRotate.setDecimals(3)
         self.spinBoxRotate.setMinimum(-180)
@@ -159,11 +160,39 @@ class FreehandRasterGeoreferencer(object):
         self.spinBoxRotate.setSingleStep(0.1)
         self.spinBoxRotate.setValue(0.0)
         self.spinBoxRotate.setToolTip("Rotation value (-180 to 180)")
-        self.spinBoxRotate.setObjectName("FreehandRasterGeoreferencer_spinbox")
+        self.spinBoxRotate.setObjectName("FreehandRasterGeoreferencer_spinbox_rotate")
         self.spinBoxRotate.setKeyboardTracking(False)
         self.spinBoxRotate.valueChanged.connect(self.spinBoxRotateValueChangeEvent)
         self.spinBoxRotate.setFocusPolicy(Qt.ClickFocus)
-        self.spinBoxRotate.focusInEvent = self.spinBoxRotateFocusInEvent
+        self.spinBoxRotate.focusInEvent = self.spinBoxFocusInEvent
+
+        # create scale value X input field in toolbar
+        self.spinBoxScaleX = QDoubleSpinBox(self.iface.mainWindow())
+        self.spinBoxScaleX.setDecimals(3)
+        self.spinBoxScaleX.setMinimum(0.001)
+        self.spinBoxScaleX.setMaximum(100)
+        self.spinBoxScaleX.setSingleStep(0.01)
+        self.spinBoxScaleX.setValue(1.0)
+        self.spinBoxScaleX.setToolTip("Scale value X (0.001 to 100)")
+        self.spinBoxScaleX.setObjectName("FreehandRasterGeoreferencer_spinbox_scaleX")
+        self.spinBoxScaleX.setKeyboardTracking(False)
+        self.spinBoxScaleX.valueChanged.connect(self.spinBoxScaleXValueChangeEvent)
+        self.spinBoxScaleX.setFocusPolicy(Qt.ClickFocus)
+        self.spinBoxScaleX.focusInEvent = self.spinBoxFocusInEvent
+
+        # create scale value Y input field in toolbar
+        self.spinBoxScaleY = QDoubleSpinBox(self.iface.mainWindow())
+        self.spinBoxScaleY.setDecimals(3)
+        self.spinBoxScaleY.setMinimum(0.001)
+        self.spinBoxScaleY.setMaximum(100)
+        self.spinBoxScaleY.setSingleStep(0.01)
+        self.spinBoxScaleY.setValue(1.0)
+        self.spinBoxScaleY.setToolTip("Scale value Y (0.001 to 100)")
+        self.spinBoxScaleY.setObjectName("FreehandRasterGeoreferencer_spinbox_scaleY")
+        self.spinBoxScaleY.setKeyboardTracking(False)
+        self.spinBoxScaleY.valueChanged.connect(self.spinBoxScaleYValueChangeEvent)
+        self.spinBoxScaleY.setFocusPolicy(Qt.ClickFocus)
+        self.spinBoxScaleY.focusInEvent = self.spinBoxFocusInEvent
 
         # create toolbar for this plugin
         self.toolbar = self.iface.addToolBar("Freehand raster georeferencing")
@@ -172,6 +201,8 @@ class FreehandRasterGeoreferencer(object):
         self.toolbar.addAction(self.actionRotateRaster)
         self.toolbar.addWidget(self.spinBoxRotate)
         self.toolbar.addAction(self.actionScaleRaster)
+        self.toolbar.addWidget(self.spinBoxScaleX)
+        self.toolbar.addWidget(self.spinBoxScaleY)
         self.toolbar.addAction(self.actionAdjustRaster)
         self.toolbar.addAction(self.actionGeoref2PRaster)
         self.toolbar.addAction(self.actionDecreaseTransparency)
@@ -243,14 +274,20 @@ class FreehandRasterGeoreferencer(object):
             self.actionIncreaseTransparency.setEnabled(True)
             self.actionExport.setEnabled(True)
             self.spinBoxRotate.setEnabled(True)
-            self.spinBoxRotateValueSetValue(layer.rotation)
+            self.spinBoxScaleX.setEnabled(True)
+            self.spinBoxScaleY.setEnabled(True)
+            self.spinBoxValueSetValue(self.spinBoxRotate, layer.rotation, self.spinBoxRotateValueChangeEvent)
+            self.spinBoxValueSetValue(self.spinBoxScaleX, layer.xScale, self.spinBoxScaleXValueChangeEvent)
+            self.spinBoxValueSetValue(self.spinBoxScaleY, layer.yScale, self.spinBoxScaleYValueChangeEvent)
             try:
                 # self.layer is the previously selected layer
-                # in case it was a FRGR layer, disconnect the spinBox
+                # in case it was a FRGR layer, disconnect the spinBoxes
                 self.layer.transformParametersChanged.disconnect()
             except Exception:
                 pass
             layer.transformParametersChanged.connect(self.spinBoxRotateUpdate)
+            layer.transformParametersChanged.connect(self.spinBoxScaleXUpdate)
+            layer.transformParametersChanged.connect(self.spinBoxScaleYUpdate)
             self.dialogAddLayer.toolButtonAdvanced.setEnabled(True)
             self.actionUndo.setEnabled(True)
             self.layer = layer
@@ -268,7 +305,11 @@ class FreehandRasterGeoreferencer(object):
             self.actionIncreaseTransparency.setEnabled(False)
             self.actionExport.setEnabled(False)
             self.spinBoxRotate.setEnabled(False)
-            self.spinBoxRotateValueSetValue(0)
+            self.spinBoxScaleX.setEnabled(False)
+            self.spinBoxScaleY.setEnabled(False)
+            self.spinBoxValueSetValue(self.spinBoxRotate, 0, self.spinBoxRotateValueChangeEvent)
+            self.spinBoxValueSetValue(self.spinBoxScaleX, 1, self.spinBoxScaleXValueChangeEvent)
+            self.spinBoxValueSetValue(self.spinBoxScaleY, 1, self.spinBoxScaleYValueChangeEvent)
             try:
                 self.layer.transformParametersChanged.disconnect()
             except Exception:
@@ -375,7 +416,13 @@ class FreehandRasterGeoreferencer(object):
             )
 
     def spinBoxRotateUpdate(self, newParameters):
-        self.spinBoxRotateValueSetValue(self.layer.rotation)
+        self.spinBoxValueSetValue(self.spinBoxRotate, self.layer.rotation, self.spinBoxRotateValueChangeEvent)
+
+    def spinBoxScaleXUpdate(self, newParameters):
+        self.spinBoxValueSetValue(self.spinBoxScaleX, self.layer.xScale, self.spinBoxScaleXValueChangeEvent)
+
+    def spinBoxScaleYUpdate(self, newParameters):
+        self.spinBoxValueSetValue(self.spinBoxScaleY, self.layer.yScale, self.spinBoxScaleYValueChangeEvent)
 
     def spinBoxRotateValueChangeEvent(self, val):
         layer = self.layer
@@ -386,13 +433,31 @@ class FreehandRasterGeoreferencer(object):
         layer.repaint()
         layer.commitTransformParameters()
 
-    def spinBoxRotateValueSetValue(self, val):
-        # for changing only the spinbox value
-        self.spinBoxRotate.valueChanged.disconnect()
-        self.spinBoxRotate.setValue(val)
-        self.spinBoxRotate.valueChanged.connect(self.spinBoxRotateValueChangeEvent)
+    def spinBoxScaleXValueChangeEvent(self, val):
+        layer = self.layer
+        layer.history.append(
+            {"action": "scale", "xScale": self.layer.xScale, "yScale": self.layer.yScale}
+        )
+        layer.setScale(val, self.layer.yScale)
+        layer.repaint()
+        layer.commitTransformParameters()
 
-    def spinBoxRotateFocusInEvent(self, event):
+    def spinBoxScaleYValueChangeEvent(self, val):
+        layer = self.layer
+        layer.history.append(
+            {"action": "scale", "xScale": self.layer.xScale, "yScale": self.layer.yScale}
+        )
+        layer.setScale(self.layer.xScale, val)
+        layer.repaint()
+        layer.commitTransformParameters()
+
+    def spinBoxValueSetValue(self, spinBox, val, event):
+        # for changing only the spinbox value
+        spinBox.valueChanged.disconnect()
+        spinBox.setValue(val)
+        spinBox.valueChanged.connect(event)
+
+    def spinBoxFocusInEvent(self, event):
         # for clear 2point rubberband
         if self.currentTool:
             layer = self.iface.activeLayer()
