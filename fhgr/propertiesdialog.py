@@ -15,8 +15,8 @@ from .qt_ui import load_ui
 
 
 class PropertiesDialog(QDialog):
-    def __init__(self, layer):
-        QDialog.__init__(self)
+    def __init__(self, layer, *, parent):
+        QDialog.__init__(self, parent)
         load_ui(self, "propertiesdialog.ui")
         self.setWindowTitle(f"{self.tr('Layer Properties')} - {layer.name()}")
 

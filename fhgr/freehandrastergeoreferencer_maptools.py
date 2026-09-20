@@ -349,7 +349,9 @@ class ScaleRasterMapTool(QgsMapToolEmitPoint):
             set_layer_visible(self.iface, self.layer, self.is_layer_visible)
         elif pressed_button == Qt.MouseButton.RightButton:
             number, ok = QInputDialog.getText(
-                None, "Scale & DPI", "Enter scale,dpi (e.g. 3000,96)"
+                self.iface.mainWindow(),
+                "Scale & DPI",
+                "Enter scale,dpi (e.g. 3000,96)",
             )
             if not ok:
                 self.layer.history.pop()

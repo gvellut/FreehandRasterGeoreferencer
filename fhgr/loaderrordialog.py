@@ -21,8 +21,8 @@ from .raster_io import RasterLoadError, probe_raster_size
 
 
 class LoadErrorDialog(QDialog):
-    def __init__(self, layer_title, filepath=None, expected_size=None):
-        QDialog.__init__(self)
+    def __init__(self, layer_title, filepath=None, expected_size=None, *, parent):
+        QDialog.__init__(self, parent)
         load_ui(self, "loaderrordialog.ui")
 
         if filepath is None:
@@ -88,13 +88,16 @@ class LoadErrorDialog(QDialog):
         if result:
             self.done(QDialog.DialogCode.Accepted)
         else:
-            message_box = QMessageBox()
-            message_box.setWindowTitle("Error")
-            message_box.setText(message)
-            message_box.setDetailedText(details)
-            message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-            configure_message_box(message_box)
-            message_box.exec()
+            message_box = QMessageBox(self)
+            try:
+                message_box.setWindowTitle("Error")
+                message_box.setText(message)
+                message_box.setDetailedText(details)
+                message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                configure_message_box(message_box)
+                message_box.exec()
+            finally:
+                message_box.deleteLater()
 
     def validate(self):
         result = True

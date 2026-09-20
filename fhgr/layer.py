@@ -189,19 +189,24 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
 
             if not os.path.exists(abs_path):
                 load_error_dialog = LoadErrorDialog(
-                    self.title, abs_path, self.expected_image_size()
+                    self.title,
+                    abs_path,
+                    self.expected_image_size(),
+                    parent=self.iface.mainWindow(),
                 )
-                result = load_error_dialog.exec()
-                if result == QDialog.DialogCode.Accepted:
-                    abs_path = load_error_dialog.lineEditImagePath.text()
-                    replacement_filepath = utils.to_relative_to_qgs(abs_path)
-                else:
-                    self.load_error = f"Raster image was not found: {abs_path}"
-                    self.error = True
-                    self.setValid(False)
-                    return
-
-                del load_error_dialog
+                try:
+                    result = load_error_dialog.exec()
+                    if result == QDialog.DialogCode.Accepted:
+                        abs_path = load_error_dialog.lineEditImagePath.text()
+                        replacement_filepath = utils.to_relative_to_qgs(abs_path)
+                    else:
+                        self.load_error = f"Raster image was not found: {abs_path}"
+                        self.error = True
+                        self.setValid(False)
+                        return
+                finally:
+                    # Release the temporary dialog even when recovery is cancelled.
+                    load_error_dialog.deleteLater()
 
             display = load_raster_for_display(abs_path)
             if replacement_filepath is not None:
@@ -634,18 +639,23 @@ class FreehandRasterGeoreferencerLayerType(QgsPluginLayerType):
     def showLayerProperties(self, layer):
         from .propertiesdialog import PropertiesDialog
 
-        dialog = PropertiesDialog(layer)
+        dialog = PropertiesDialog(layer, parent=self.plugin.iface.mainWindow())
         dialog.horizontalSlider_Transparency.valueChanged.connect(
             layer.transparency_changed
         )
         dialog.spinBox_Transparency.valueChanged.connect(layer.transparency_changed)
 
-        dialog.exec()
-
-        dialog.horizontalSlider_Transparency.valueChanged.disconnect(
-            layer.transparency_changed
-        )
-        dialog.spinBox_Transparency.valueChanged.disconnect(layer.transparency_changed)
+        try:
+            dialog.exec()
+        finally:
+            # Disconnect layer signals before releasing the temporary dialog.
+            dialog.horizontalSlider_Transparency.valueChanged.disconnect(
+                layer.transparency_changed
+            )
+            dialog.spinBox_Transparency.valueChanged.disconnect(
+                layer.transparency_changed
+            )
+            dialog.deleteLater()
         return True
 
 

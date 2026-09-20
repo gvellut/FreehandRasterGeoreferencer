@@ -17,8 +17,8 @@ from .qt_ui import adjust_dialog_to_content, configure_message_box, load_ui
 
 
 class ExportGeorefRasterDialog(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
+    def __init__(self, *, parent):
+        QDialog.__init__(self, parent)
         load_ui(self, "exportgeorefrasterdialog.ui")
         adjust_dialog_to_content(self)
 
@@ -58,14 +58,14 @@ class ExportGeorefRasterDialog(QDialog):
 
         if not self.checkBoxOnlyWorldFile.isChecked():
             filepath, _ = QFileDialog.getSaveFileName(
-                None,
+                self,
                 "Export georeferenced raster",
                 filepath_dialog,
                 "Images (*.png *.bmp *.jpg *.tif *.tiff)",
             )
         else:
             filepath, _ = QFileDialog.getOpenFileName(
-                None,
+                self,
                 "Export world file for raster",
                 filepath_dialog,
                 "Images (*.png *.bmp *.jpg *.tif *.tiff)",
@@ -80,13 +80,16 @@ class ExportGeorefRasterDialog(QDialog):
         if result:
             self.done(QDialog.DialogCode.Accepted)
         else:
-            message_box = QMessageBox()
-            message_box.setWindowTitle("Error")
-            message_box.setText(message)
-            message_box.setDetailedText(details)
-            message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-            configure_message_box(message_box)
-            message_box.exec()
+            message_box = QMessageBox(self)
+            try:
+                message_box.setWindowTitle("Error")
+                message_box.setText(message)
+                message_box.setDetailedText(details)
+                message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                configure_message_box(message_box)
+                message_box.exec()
+            finally:
+                message_box.deleteLater()
 
     def validate(self):
         result = True

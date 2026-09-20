@@ -178,8 +178,12 @@ class FreehandRasterGeoreferencer:
         self.layerType = FreehandRasterGeoreferencerLayerType(self)
         QgsApplication.pluginLayerRegistry().addPluginLayerType(self.layerType)
 
-        self.dialogAddLayer = FreehandRasterGeoreferencerDialog()
-        self.dialogExportGeorefRaster = ExportGeorefRasterDialog()
+        self.dialogAddLayer = FreehandRasterGeoreferencerDialog(
+            parent=self.iface.mainWindow()
+        )
+        self.dialogExportGeorefRaster = ExportGeorefRasterDialog(
+            parent=self.iface.mainWindow()
+        )
 
         self.moveTool = MoveRasterMapTool(self.iface)
         self.moveTool.setAction(self.actionMoveRaster)
@@ -197,6 +201,13 @@ class FreehandRasterGeoreferencer:
         self.check_current_layer_is_plugin_layer()
 
     def unload(self):
+        # Release reusable dialogs owned by the QGIS main window.
+        for dialog in (self.dialogAddLayer, self.dialogExportGeorefRaster):
+            dialog.close()
+            dialog.deleteLater()
+        self.dialogAddLayer = None
+        self.dialogExportGeorefRaster = None
+
         # Remove the plugin menu item and icon
         self.iface.layerToolBar().removeAction(self.actionAddLayer)
         self.iface.removeAddLayerAction(self.actionAddLayer)

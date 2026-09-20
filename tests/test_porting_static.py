@@ -143,7 +143,7 @@ import os
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from qgis.PyQt.QtWidgets import QApplication
+from qgis.PyQt.QtWidgets import QApplication, QWidget
 
 from fhgr.exportgeorefrasterdialog import ExportGeorefRasterDialog
 from fhgr.freehandrastergeoreferencerdialog import FreehandRasterGeoreferencerDialog
@@ -151,17 +151,19 @@ from fhgr.loaderrordialog import LoadErrorDialog
 
 
 app = QApplication.instance() or QApplication([])
+parent = QWidget()
 
 dialogs = [
     (
         LoadErrorDialog(
             "C:/Users/loren/Giant Files/QGIS files/Projects - WLR/"
-            "QGIS only/WLR fresh 220823/E GH Grading snip.PNG"
+            "QGIS only/WLR fresh 220823/E GH Grading snip.PNG",
+            parent=parent,
         ),
         ("lblError", "lineEditImagePath", "pushButtonBrowse"),
     ),
     (
-        FreehandRasterGeoreferencerDialog(),
+        FreehandRasterGeoreferencerDialog(parent=parent),
         (
             "lineEditImagePath",
             "pushButtonBrowse",
@@ -171,7 +173,7 @@ dialogs = [
         ),
     ),
     (
-        ExportGeorefRasterDialog(),
+        ExportGeorefRasterDialog(parent=parent),
         (
             "lineEditImagePath",
             "pushButtonBrowse",

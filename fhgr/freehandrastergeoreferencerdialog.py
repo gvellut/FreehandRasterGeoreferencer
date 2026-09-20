@@ -24,8 +24,8 @@ class FreehandRasterGeoreferencerDialog(QDialog):
     REPLACE = 2
     DUPLICATE = 3
 
-    def __init__(self):
-        QDialog.__init__(self)
+    def __init__(self, *, parent):
+        QDialog.__init__(self, parent)
         load_ui(self, "freehandrastergeoreferencerdialog.ui")
         adjust_dialog_to_content(self)
         self.configure_advanced_menu()
@@ -102,13 +102,16 @@ class FreehandRasterGeoreferencerDialog(QDialog):
         if result:
             self.done(return_value)
         else:
-            message_box = QMessageBox()
-            message_box.setWindowTitle("Error")
-            message_box.setText(message)
-            message_box.setDetailedText(details)
-            message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-            configure_message_box(message_box)
-            message_box.exec()
+            message_box = QMessageBox(self)
+            try:
+                message_box.setWindowTitle("Error")
+                message_box.setText(message)
+                message_box.setDetailedText(details)
+                message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                configure_message_box(message_box)
+                message_box.exec()
+            finally:
+                message_box.deleteLater()
 
     def validate(self):
         result = True
