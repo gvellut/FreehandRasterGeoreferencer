@@ -56,7 +56,7 @@ class FreehandRasterGeoreferencerDialog(QDialog):
             self,
             "Select raster",
             browser_dir,
-            "Rasters (*.png *.bmp *.jpg *.jpeg *.tif *.tiff *.pdf *.jp2 *.ecw);;"
+            "Rasters (*.png *.bmp *.jpg *.jpeg *.tif *.tiff *.pdf *.jp2 *.ecw *.webp);;"
             "All files (*)",
         )
 

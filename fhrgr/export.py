@@ -135,6 +135,9 @@ class ExportGeorefRasterCommand:
                 world_file_path += "bpw"
             elif raster_format == "tif":
                 world_file_path += "tfw"
+            elif raster_format == "webp":
+                # Use the WebP-specific world file suffix recognized by GDAL.
+                world_file_path += "webpw"
 
             with open(world_file_path, "w") as writer:
                 # order is as described at
