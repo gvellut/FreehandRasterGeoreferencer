@@ -58,14 +58,14 @@ class ExportGeorefRasterDialog(QDialog, Ui_ExportGeorefRasterDialog):
                 None,
                 "Export georeferenced raster",
                 filepathDialog,
-                "Images (*.png *.bmp *.jpg *.tif *.tiff)",
+                "Images (*.png *.bmp *.jpg *.tif *.tiff *.webp)",
             )
         else:
             filepath, _ = QFileDialog.getOpenFileName(
                 None,
                 "Export world file for raster",
                 filepathDialog,
-                "Images (*.png *.bmp *.jpg *.tif *.tiff)",
+                "Images (*.png *.bmp *.jpg *.tif *.tiff *.webp)",
             )
 
         if filepath:
@@ -99,7 +99,7 @@ class ExportGeorefRasterDialog(QDialog, Ui_ExportGeorefRasterDialog):
         if result:
             _, extension = os.path.splitext(self.imagePath)
             extension = extension.lower()
-            if extension not in [".jpg", ".bmp", ".png", ".tif", ".tiff"]:
+            if extension not in [".jpg", ".bmp", ".png", ".tif", ".tiff", ".webp"]:
                 result = False
                 if len(details) > 0:
                     details += "\n"
