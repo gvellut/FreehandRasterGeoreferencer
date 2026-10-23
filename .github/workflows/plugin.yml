@@ -38,7 +38,7 @@ jobs:
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fhgr
+          name: fhrgr
           path: "*.zip"
 
       - name: Release plugin

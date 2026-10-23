@@ -17,7 +17,7 @@ deprecated=False
 category=Raster
 changelog=0.9.0
         * Port to QGIS 4 and Qt 6
-        * Package plugin from the fhgr directory with uv and qgis-plugin-ci
+        * Package plugin from the fhrgr directory with uv and qgis-plugin-ci
     0.8.3
         * Disable pixel transformation for formats other than TIFF
     0.8.0

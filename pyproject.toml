@@ -16,7 +16,7 @@ dev = [
 ]
 
 [tool.qgis-plugin-ci]
-plugin_path = "fhgr"
+plugin_path = "fhrgr"
 github_organization_slug = "gvellut"
 project_slug = "FreehandRasterGeoreferencer"
 

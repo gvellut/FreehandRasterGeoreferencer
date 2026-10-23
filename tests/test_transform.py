@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from fhgr.transform import (
+from fhrgr.transform import (
     Point,
     center_from_point_transform,
     corner_coordinates,

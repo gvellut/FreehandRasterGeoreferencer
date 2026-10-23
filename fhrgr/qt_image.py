@@ -23,5 +23,5 @@ def qimage_from_display_array(array):
         raise ValueError("Display image arrays must be grayscale, RGB, or RGBA")
 
     image = QImage(buffer.data, width, height, bytes_per_line, image_format)
-    image._fhgr_buffer = buffer
+    image._fhrgr_buffer = buffer
     return image

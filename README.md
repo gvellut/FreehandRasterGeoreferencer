@@ -10,10 +10,10 @@ In QGIS, open the "Plugins" > "Manage and install plugin" dialog. Install the "F
 
 ## From Github
 
-Use the QGIS plugin directory named `fhgr`:
+Use the QGIS plugin directory named `fhrgr`:
 
 1. Download a ZIP of the repository or clone it using "git clone"
-2. Copy the `fhgr` directory directly under your QGIS plugin directory
+2. Copy the `fhrgr` directory directly under your QGIS plugin directory
 3. Restart QGIS; the plugin should be listed in the "Plugins" > "Manage and install plugin" dialog
 
 The plugin is QGIS 4-only. QGIS 3 compatibility is not maintained on this branch. A legacy version for QGIS 2 is in the `qgis2` branch.
@@ -30,7 +30,7 @@ uv run task test
 uv run task package
 ```
 
-The package task uses `qgis-plugin-ci` and creates a QGIS plugin ZIP from the `fhgr` directory. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
+The package task uses `qgis-plugin-ci` and creates a QGIS plugin ZIP from the `fhrgr` directory. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
 
 # Documentation
 

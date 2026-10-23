@@ -35,7 +35,7 @@ This proposal targets QGIS 4 only. It does not preserve QGIS 3 compatibility.
 
 ## Target Architecture
 
-- Keep `fhgr/` as the plugin package.
+- Keep `fhrgr/` as the plugin package.
 - Split code into these boundaries:
   - `qgis_plugin.py` or current `freehandrastergeoreferencer.py`: QGIS actions,
     menus, toolbar, map-tool wiring.

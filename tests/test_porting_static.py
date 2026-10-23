@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN = ROOT / "fhgr"
+PLUGIN = ROOT / "fhrgr"
 
 
 def plugin_sources():
@@ -35,9 +35,9 @@ def test_utils_helpers_without_qgis(monkeypatch):
     monkeypatch.setitem(sys.modules, "qgis.PyQt", pyqt)
     monkeypatch.setitem(sys.modules, "qgis.PyQt.QtCore", qtcore)
     monkeypatch.setitem(sys.modules, "qgis.core", core)
-    sys.modules.pop("fhgr.utils", None)
+    sys.modules.pop("fhrgr.utils", None)
 
-    utils = importlib.import_module("fhgr.utils")
+    utils = importlib.import_module("fhrgr.utils")
 
     assert utils.image_format("scan.tiff") == "tif"
     assert utils.image_format("scan.tifF") == "tif"
@@ -145,9 +145,9 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from qgis.PyQt.QtWidgets import QApplication, QWidget
 
-from fhgr.exportgeorefrasterdialog import ExportGeorefRasterDialog
-from fhgr.freehandrastergeoreferencerdialog import FreehandRasterGeoreferencerDialog
-from fhgr.loaderrordialog import LoadErrorDialog
+from fhrgr.exportgeorefrasterdialog import ExportGeorefRasterDialog
+from fhrgr.freehandrastergeoreferencerdialog import FreehandRasterGeoreferencerDialog
+from fhrgr.loaderrordialog import LoadErrorDialog
 
 
 app = QApplication.instance() or QApplication([])

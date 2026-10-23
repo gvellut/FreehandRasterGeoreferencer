@@ -4,7 +4,7 @@
 
 This project is a QGIS 4 plugin for interactive raster georeferencing. 
 
-The plugin package lives in `fhgr/`; keep plugin code, `metadata.txt`, `.ui` files, and icons there.
+The plugin package lives in `fhrgr/`; keep plugin code, `metadata.txt`, `.ui` files, and icons there.
 
 ## Commands
 
@@ -14,7 +14,7 @@ The plugin package lives in `fhgr/`; keep plugin code, `metadata.txt`, `.ui` fil
 - Tests: `uv run task test`
 - Package: `uv run task package`
 
-`qgis-plugin-ci` packages from Git-tracked files. If `fhgr/` is new or
+`qgis-plugin-ci` packages from Git-tracked files. If `fhrgr/` is new or
 unstaged, package verification may need a temporary clean Git repo.
 
 ## QGIS 4 Rules

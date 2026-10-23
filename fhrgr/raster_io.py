@@ -99,7 +99,7 @@ def load_raster_for_display(path):
         warnings=warnings,
         geotransform=_dataset_geotransform(dataset),
         crs_wkt=dataset.GetProjection() or None,
-        buffer=qimage._fhgr_buffer,
+        buffer=qimage._fhrgr_buffer,
     )
 
 
