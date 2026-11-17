@@ -128,6 +128,8 @@ class ExportGeorefRasterCommand(object):
                 worldFilePath += "bpw"
             elif rasterFormat == "tif":
                 worldFilePath += "tfw"
+            elif rasterFormat == "webp":
+                worldFilePath += "wpw"
 
             with open(worldFilePath, "w") as writer:
                 # order is as described at
