@@ -47,8 +47,7 @@ jobs:
           QGIS_PLUGIN_TOKEN: ${{ secrets.QGIS_PLUGIN_TOKEN }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          VERSION="$(uv version --short)"
-          uv run qgis-plugin-ci release "$VERSION" \
+          uv run plugin-version release \
             --release-tag "$RELEASE_TAG" \
             --github-token "$GITHUB_TOKEN" \
             --qgis-token "$QGIS_PLUGIN_TOKEN" \

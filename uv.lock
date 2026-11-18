@@ -228,7 +228,7 @@ wheels = [
 [[package]]
 name = "freehand-raster-georeferencer"
 version = "0.400.0"
-source = { virtual = "." }
+source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [

@@ -10,10 +10,10 @@ In QGIS, open the "Plugins" > "Manage and install plugin" dialog. Install the "F
 
 ## From Github
 
-Use the QGIS plugin directory named `fhrgr`:
+Use the QGIS plugin directory at `src/fhrgr`:
 
 1. Download a ZIP of the repository or clone it using "git clone"
-2. Copy the `fhrgr` directory directly under your QGIS plugin directory
+2. Copy the `src/fhrgr` directory directly under your QGIS plugin directory, keeping its name `fhrgr`
 3. Restart QGIS; the plugin should be listed in the "Plugins" > "Manage and install plugin" dialog
 
 The plugin is QGIS 4-only. QGIS 3 compatibility is not maintained on this branch. A legacy version for QGIS 2 is in the `qgis2` branch.
@@ -30,9 +30,11 @@ uv run task test
 uv run task package
 ```
 
-To set the plugin version, edit `version` under `[project]` in `pyproject.toml`, then run `uv run task sync-version` to update `fhrgr/metadata.txt`.
+Plugin code, tests, and development scripts live in `src/fhrgr`, `src/tests`, and `src/scripts`.
 
-The package task uses `qgis-plugin-ci` to create a QGIS plugin ZIP from the `fhrgr` directory using the version in `pyproject.toml`. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
+To set the plugin version, edit `version` under `[project]` in `pyproject.toml`, then run `uv run plugin-version sync` to update `src/fhrgr/metadata.txt`. The `uv run task sync-version` task runs the same command.
+
+The package task uses `qgis-plugin-ci` to create a QGIS plugin ZIP from `src/fhrgr` using the version in `pyproject.toml`. The ZIP is written to the repository root and contains the plugin under `fhrgr/`. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
 
 # Documentation
 

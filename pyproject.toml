@@ -6,6 +6,13 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.scripts]
+plugin-version = "scripts.plugin_version:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
 [dependency-groups]
 dev = [
     "numpy>=2.3.0",
@@ -16,7 +23,7 @@ dev = [
 ]
 
 [tool.qgis-plugin-ci]
-plugin_path = "fhrgr"
+plugin_path = "src/fhrgr"
 github_organization_slug = "gvellut"
 project_slug = "FreehandRasterGeoreferencer"
 
@@ -24,11 +31,12 @@ project_slug = "FreehandRasterGeoreferencer"
 lint = "ruff check ."
 format-check = "ruff format --check ."
 test = "pytest"
-sync-version = "python scripts/plugin_version.py sync"
-package = "python scripts/plugin_version.py package --allow-uncommitted-changes --disable-submodule-update"
+sync-version = "plugin-version sync"
+package = "plugin-version package --allow-uncommitted-changes --disable-submodule-update"
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src"]
+testpaths = ["src/tests"]
 
 [tool.ruff]
 line-length = 88
@@ -46,3 +54,6 @@ order-by-type = true
 
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.build-backend]
+module-name = "scripts"

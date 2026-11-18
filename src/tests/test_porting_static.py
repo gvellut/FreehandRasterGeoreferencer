@@ -12,8 +12,8 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
-PLUGIN = ROOT / "fhrgr"
+ROOT = Path(__file__).resolve().parents[2]
+PLUGIN = ROOT / "src" / "fhrgr"
 
 
 def plugin_sources():
@@ -206,7 +206,7 @@ assert dialogs[0][0].lblError.wordWrap()
         result = subprocess.run(
             [sys.executable, "-c", textwrap.dedent(code)],
             check=False,
-            cwd=ROOT,
+            cwd=ROOT / "src",
             env=env,
             text=True,
             capture_output=True,
