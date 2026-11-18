@@ -4,7 +4,7 @@ qgisMinimumVersion=4.0
 qgisMaximumVersion=4.99
 description=Interactive georeferencing of rasters
 about=Tools to georeference a raster interactively (move, rotate, scale, export...)
-version=0.9.0
+version=0.400.0
 author=Guilhem Vellut
 email=g@vellut.com
 tags=raster,georeferencing
@@ -15,7 +15,7 @@ icon=icons/icon.png
 experimental=False
 deprecated=False
 category=Raster
-changelog=0.9.0
+changelog=0.400.0
         * Port to QGIS 4 and Qt 6
         * Package plugin from the fhrgr directory with uv and qgis-plugin-ci
     0.8.3

@@ -1,6 +1,6 @@
 [project]
 name = "freehand-raster-georeferencer"
-version = "0.9.0"
+version = "0.400.0"
 description = "QGIS plugin for interactive raster georeferencing"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -24,33 +24,25 @@ project_slug = "FreehandRasterGeoreferencer"
 lint = "ruff check ."
 format-check = "ruff format --check ."
 test = "pytest"
-package = "qgis-plugin-ci package 0.9.0 --allow-uncommitted-changes --disable-submodule-update"
+sync-version = "python scripts/plugin_version.py sync"
+package = "python scripts/plugin_version.py package --allow-uncommitted-changes --disable-submodule-update"
 
 [tool.pytest.ini_options]
-pythonpath = [
-    ".",
-]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 88
-target-version = "py313"
-extend-exclude = [
-    ".prompts",
-]
+target-version = "py312"
+extend-exclude = [".prompts"]
 
 [tool.ruff.lint]
-select = [
-    "E",
-    "F",
-    "I",
-    "UP",
-    "B",
-]
-ignore = [
-    "E501",
-]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
 force-sort-within-sections = true
 order-by-type = true
+
+[tool.uv]
+exclude-newer = "7 days"

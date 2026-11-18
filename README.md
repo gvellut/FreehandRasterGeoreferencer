@@ -30,7 +30,9 @@ uv run task test
 uv run task package
 ```
 
-The package task uses `qgis-plugin-ci` and creates a QGIS plugin ZIP from the `fhrgr` directory. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
+To set the plugin version, edit `version` under `[project]` in `pyproject.toml`, then run `uv run task sync-version` to update `fhrgr/metadata.txt`.
+
+The package task uses `qgis-plugin-ci` to create a QGIS plugin ZIP from the `fhrgr` directory using the version in `pyproject.toml`. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
 
 # Documentation
 

@@ -13,3 +13,4 @@ __pycache__
 .venv
 .python-version
 test_data
+node_modules

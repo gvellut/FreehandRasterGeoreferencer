@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import textwrap
+import tomllib
 import types
 import xml.etree.ElementTree as ET
 
@@ -50,8 +51,10 @@ def test_metadata_targets_qgis4_only():
     metadata = configparser.ConfigParser()
     metadata.read(PLUGIN / "metadata.txt")
     general = metadata["general"]
+    with (ROOT / "pyproject.toml").open("rb") as project_file:
+        project_version = tomllib.load(project_file)["project"]["version"]
 
-    assert general["version"] == "0.9.0"
+    assert general["version"] == project_version, "Run uv run task sync-version"
     assert general["qgisMinimumVersion"] == "4.0"
     assert general["qgisMaximumVersion"] == "4.99"
     assert general["icon"] == "icons/icon.png"
