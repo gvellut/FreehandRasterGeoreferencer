@@ -92,7 +92,7 @@ For each release:
    ./deploy.sh
    ```
 
-    The wrapper reads the version from `pyproject.toml`, creates and pushes an annotated tag such as `v0.400.0`, and watches the release workflow using `~/bin/_deploy/watch_workflow.sh` (use `--nowatch` on machines without the watcher). It refuses to reuse an existing version tag. 
+    The wrapper reads the version from `pyproject.toml`, creates and pushes an annotated tag such as `v0.400.0`, and watches the release workflow using `~/bin/_deploy/watch_workflow.sh` (use `--nowatch` on machines without the watcher).
 
     GitHub Actions runs on `v<version>` tags, checks that the tag matches the project version, creates the GitHub release for that tag, and uploads the plugin ZIP to that release and the QGIS registry. The plugin metadata and ZIP filename keep the unprefixed version, such as `0.400.0`.
 

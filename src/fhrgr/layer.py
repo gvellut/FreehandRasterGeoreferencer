@@ -650,21 +650,17 @@ class FreehandRasterGeoreferencerLayerType(QgsPluginLayerType):
         from .propertiesdialog import PropertiesDialog
 
         dialog = PropertiesDialog(layer, parent=self.plugin.iface.mainWindow())
-        dialog.horizontalSlider_Transparency.valueChanged.connect(
-            layer.transparency_changed
-        )
-        dialog.spinBox_Transparency.valueChanged.connect(layer.transparency_changed)
-
         try:
+            # Close the dialog before its layer is destroyed.
+            layer.willBeDeleted.connect(dialog.reject)
+            dialog.horizontalSlider_Transparency.valueChanged.connect(
+                layer.transparency_changed
+            )
+            dialog.spinBox_Transparency.valueChanged.connect(layer.transparency_changed)
             dialog.exec()
         finally:
-            # Disconnect layer signals before releasing the temporary dialog.
-            dialog.horizontalSlider_Transparency.valueChanged.disconnect(
-                layer.transparency_changed
-            )
-            dialog.spinBox_Transparency.valueChanged.disconnect(
-                layer.transparency_changed
-            )
+            # Qt disconnects signals when either object is destroyed; cleanup
+            # must not access a layer that may have been deleted during exec().
             dialog.deleteLater()
         return True
 

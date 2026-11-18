@@ -8,6 +8,7 @@ deploy() {
   local version_tag
   local current_branch
   local workflow_watcher
+  local previous_run_id=0
   local skip_watch=false
 
   # Allow deployment on machines without the local workflow watcher.
@@ -57,13 +58,19 @@ deploy() {
     return 1
   fi
 
+  # Capture the existing run before pushing so a reused tag cannot select it.
+  if [ "$skip_watch" = false ]; then
+    previous_run_id="$(gh run list --branch "$version_tag" --limit 1 \
+      --json databaseId --jq '.[0].databaseId // 0')"
+  fi
+
   git tag -a "$version_tag" -m "Release $version_tag"
   git push origin "refs/tags/$version_tag"
   echo "Tag '$version_tag' pushed" >&2
 
-  # Reuse the generic watcher, forwarding its optional polling arguments.
+  # Watch only a newer run for this tag, forwarding optional polling arguments.
   if [ "$skip_watch" = false ]; then
-    "$workflow_watcher" "$version_tag" "$@"
+    "$workflow_watcher" --after-run-id "$previous_run_id" "$version_tag" "$@"
   fi
 }
 

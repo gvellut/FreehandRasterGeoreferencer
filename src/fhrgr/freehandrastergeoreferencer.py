@@ -41,8 +41,7 @@ class FreehandRasterGeoreferencer:
         self.plugin_dir = os.path.dirname(__file__)
         self.layers = {}
         self.layer = None
-        QgsProject.instance().layerRemoved.connect(self.layer_removed)
-        self.iface.currentLayerChanged.connect(self.current_layer_changed)
+        self._gui_ready = False
 
     def initGui(self):
         # Create actions
@@ -198,10 +197,46 @@ class FreehandRasterGeoreferencer:
         self.georef2PTool.setAction(self.actionGeoref2PRaster)
         self.currentTool = None
 
+        # Connect external callbacks only after all their UI objects exist.
+        self._gui_ready = True
+        QgsProject.instance().layerRemoved.connect(self.layer_removed)
+        self.iface.currentLayerChanged.connect(self.current_layer_changed)
+
         # default state for toolbar
         self.check_current_layer_is_plugin_layer()
 
     def unload(self):
+        if not self._gui_ready:
+            return
+
+        # Stop callbacks before closing dialogs or removing layers can emit signals.
+        self._gui_ready = False
+        QgsProject.instance().layerRemoved.disconnect(self.layer_removed)
+        self.iface.currentLayerChanged.disconnect(self.current_layer_changed)
+        self._disconnect_layer_rotation()
+        self.spinBoxRotate.valueChanged.disconnect(
+            self.spin_box_rotate_value_change_event
+        )
+
+        # Disable surviving actions and detach canvas tools before their layers go.
+        for action in self.toolbar.actions():
+            action.setEnabled(False)
+        tools = (
+            self.moveTool,
+            self.rotateTool,
+            self.scaleTool,
+            self.adjustTool,
+            self.georef2PTool,
+        )
+        canvas = self.iface.mapCanvas()
+        if canvas.mapTool() in tools:
+            canvas.unsetMapTool(canvas.mapTool())
+            self.iface.actionPan().trigger()
+        self.currentTool = None
+        for tool in tools:
+            tool.reset()
+            tool.deleteLater()
+
         # Release reusable dialogs owned by the QGIS main window.
         for dialog in (self.dialogAddLayer, self.dialogExportGeorefRaster):
             dialog.close()
@@ -221,10 +256,12 @@ class FreehandRasterGeoreferencer:
             FreehandRasterGeoreferencerLayer.LAYER_TYPE
         )
 
-        QgsProject.instance().layerRemoved.disconnect(self.layer_removed)
-        self.iface.currentLayerChanged.disconnect(self.current_layer_changed)
-
-        del self.toolbar
+        # Delete Qt objects explicitly; their main-window parent outlives the plugin.
+        for action in self.toolbar.actions():
+            action.deleteLater()
+        self.toolbar.deleteLater()
+        self.toolbar = None
+        self.layers.clear()
 
     def layer_removed(self, layer_id):
         if layer_id in self.layers:
@@ -234,10 +271,9 @@ class FreehandRasterGeoreferencer:
     def current_layer_changed(self, layer):
         self.check_current_layer_is_plugin_layer()
 
-    def check_current_layer_is_plugin_layer(self):
-        layer = self.iface.activeLayer()
+    def _disconnect_layer_rotation(self):
         # self.layer is the previously selected layer. If it was a plugin layer,
-        # disconnect only the rotation spin box handler before changing selection.
+        # disconnect only the rotation spin box handler on selection change or unload.
         if self.layer is not None:
             try:
                 self.layer.transform_parameters_changed.disconnect(
@@ -249,6 +285,14 @@ class FreehandRasterGeoreferencer:
                     "Freehand raster georeferencer",
                     Qgis.MessageLevel.Warning,
                 )
+        self.layer = None
+
+    def check_current_layer_is_plugin_layer(self):
+        if not self._gui_ready:
+            return
+
+        layer = self.iface.activeLayer()
+        self._disconnect_layer_rotation()
         if (
             layer
             and layer.type() == Qgis.LayerType.Plugin
@@ -293,9 +337,14 @@ class FreehandRasterGeoreferencer:
                 self._uncheck_current_tool()
 
     def add_layer(self):
+        if not self._gui_ready:
+            return
         self.dialogAddLayer.clear(self.layer)
         self.dialogAddLayer.show()
         result = self.dialogAddLayer.exec()
+        # Unloading can close this modal dialog while its event loop is running.
+        if not self._gui_ready:
+            return
         if result == QDialog.DialogCode.Accepted:
             self.create_freehand_raster_georeferencer_layer()
         elif result == FreehandRasterGeoreferencerDialog.REPLACE:
@@ -327,6 +376,8 @@ class FreehandRasterGeoreferencer:
             self.iface.setActiveLayer(layer)
 
     def _toggle_tool(self, tool):
+        if not self._gui_ready:
+            return
         if self.currentTool is tool:
             # Toggle
             self._uncheck_current_tool()
@@ -359,22 +410,31 @@ class FreehandRasterGeoreferencer:
         self._toggle_tool(self.georef2PTool)
 
     def increase_transparency(self):
+        if not self._gui_ready:
+            return
         layer = self.iface.activeLayer()
         # clamp to 100
         tr = min(layer.transparency + 10, 100)
         layer.transparency_changed(tr)
 
     def decrease_transparency(self):
+        if not self._gui_ready:
+            return
         layer = self.iface.activeLayer()
         # clamp to 0
         tr = max(layer.transparency - 10, 0)
         layer.transparency_changed(tr)
 
     def export_georef_raster(self):
+        if not self._gui_ready:
+            return
         layer = self.iface.activeLayer()
         self.dialogExportGeorefRaster.clear(layer)
         self.dialogExportGeorefRaster.show()
         result = self.dialogExportGeorefRaster.exec()
+        # Unloading can close this modal dialog while its event loop is running.
+        if not self._gui_ready:
+            return
         if result == QDialog.DialogCode.Accepted:
             exportCommand = ExportGeorefRasterCommand(self.iface)
             exportCommand.export_georef_raster(
@@ -385,9 +445,13 @@ class FreehandRasterGeoreferencer:
             )
 
     def spin_box_rotate_update(self, newParameters):
+        if not self._gui_ready or self.layer is None:
+            return
         self.spin_box_rotate_value_set_value(self.layer.rotation)
 
     def spin_box_rotate_value_change_event(self, val):
+        if not self._gui_ready or self.layer is None:
+            return
         layer = self.layer
         layer.history.append({
             "action": "rotation",
@@ -406,12 +470,14 @@ class FreehandRasterGeoreferencer:
 
     def spin_box_rotate_focus_in_event(self, event):
         # for clear 2point rubberband
-        if self.currentTool:
+        if self._gui_ready and self.currentTool:
             layer = self.iface.activeLayer()
             self.currentTool.reset()
             self.currentTool.set_layer(layer)
 
     def undo(self):
+        if not self._gui_ready:
+            return
         layer = self.iface.activeLayer()
         if self.currentTool:
             self.currentTool.reset()  # for clear 2point rubberband
