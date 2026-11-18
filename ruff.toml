@@ -1,5 +1,6 @@
 line-length = 88
 target-version = "py313"
+format.preview = true
 
 [lint]
 select = [
@@ -18,9 +19,6 @@ select = [
 ]
 # do not auto del the unused imports
 unfixable = ["F401"]
-
-[format]
-preview = true
 
 [lint.isort]
 combine-as-imports = true

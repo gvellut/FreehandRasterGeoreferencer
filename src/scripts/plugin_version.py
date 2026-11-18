@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parents[2]
 class PluginParameters(Parameters):
     def __init__(self, definition):
         super().__init__(definition)
-        # QGIS installs the plugin under its package name, including for nested sources.
-        self.plugin_zip_directory = Path(self.plugin_path).name
+        # QGIS registry updates must keep the original registered package name.
+        self.plugin_zip_directory = "FreehandRasterGeoreferencer"
 
     @staticmethod
     def archive_name(plugin_name: str, release_version: str) -> str:

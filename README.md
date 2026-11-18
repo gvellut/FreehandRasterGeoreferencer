@@ -13,7 +13,7 @@ In QGIS, open the "Plugins" > "Manage and install plugin" dialog. Install the "F
 Use the QGIS plugin directory at `src/fhrgr`:
 
 1. Download a ZIP of the repository or clone it using "git clone"
-2. Copy the `src/fhrgr` directory directly under your QGIS plugin directory, keeping its name `fhrgr`
+2. Copy the `src/fhrgr` directory directly under your QGIS plugin directory and name the copy `FreehandRasterGeoreferencer` to match the registered plugin package
 3. Restart QGIS; the plugin should be listed in the "Plugins" > "Manage and install plugin" dialog
 
 The plugin is QGIS 4-only. QGIS 3 compatibility is not maintained on this branch. A legacy version for QGIS 2 is in the `qgis2` branch.
@@ -34,7 +34,7 @@ Plugin code, tests, and development scripts live in `src/fhrgr`, `src/tests`, an
 
 To set the plugin version, edit `version` under `[project]` in `pyproject.toml`, then run `uv run plugin-version sync` to update `src/fhrgr/metadata.txt`. The `uv run task sync-version` task runs the same command.
 
-The package task uses `qgis-plugin-ci` to create a QGIS plugin ZIP from `src/fhrgr` using the version in `pyproject.toml`. The ZIP is written to the repository root and contains the plugin under `fhrgr/`. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
+The package task uses `qgis-plugin-ci` to create a QGIS plugin ZIP from `src/fhrgr` using the version in `pyproject.toml`. The ZIP is written to the repository root as `fhrgr.<version>.zip` and contains the plugin under `FreehandRasterGeoreferencer/`, matching the existing QGIS registry package. The plugin directory includes the required `LICENSE` file. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
 
 # Documentation
 
@@ -53,3 +53,56 @@ Report issues at https://github.com/gvellut/FreehandRasterGeoreferencer/issues
 - The display renderer uses deterministic conversion rules rather than the full QGIS raster renderer. Non-Byte data is rescaled to 8-bit for display, color tables and alpha bands are interpreted where present, and extra bands may be ignored with a warning.
     - If a pixel transformation is performed, the plugin shows a raster-display warning when the raster is opened. When exporting the georeferencing, unless you are fine with the pixel transformation, be sure to check the "Only export world file" in the dialog, then choose the original raster file: In that case, no image data will be exported, just the georeferencing (including rotation).
 - It is also possible to perform the pixel transformation yourself, before opening the raster with the plugin. For example, if you have a 10-band raster with band 5, 3, 6 as RGB, you can use GDAL to export a version of the raster with those bands in the correct order. Make sure the dimensions (width, length) of the raster  stay the same though. Then use that version of the raster for georeferencing with the plugin. Finally, export only the world file and select the original raster. The original raster will then have a world file.
+
+## Deploy checklist
+
+Before the first deployment, configure the `QGIS_PLUGIN_TOKEN` repository secret as described below.
+
+For each release:
+
+1. Make sure the code to release is on your local `main` branch.
+2. Set `version` under `[project]` in `pyproject.toml`, for example `0.400.0`. Do not include the `v` prefix. Choose a version whose `v<version>` tag does not already exist, and update the changelog in `src/fhrgr/metadata.txt` for that release.
+3. Copy the project version into the plugin metadata:
+ 
+   ```sh
+   uv run task sync-version
+   ```
+
+4. Check the release locally:
+
+   ```sh
+   uv run task lint
+   uv run task format-check
+   uv run task test
+   ```
+
+5. Review `git status` and stage all files intended for the release, including new files. Commit the release changes, then push `main`:
+
+   ```sh
+   git commit -m "Prepare release 0.400.0"
+   git push origin main
+   git status
+   ```
+
+   The working tree must be clean, with local `main` and `origin/main` pointing to the same commit.
+
+6. Start deployment:
+
+   ```sh
+   ./deploy.sh
+   ```
+
+
+    The wrapper reads the version from `pyproject.toml`, creates and pushes an annotated tag such as `v0.400.0`, and watches the release workflow using `~/bin/_deploy/watch_workflow.sh` (use `--nowatch` on machines without the watcher). It refuses to reuse an existing version tag. 
+
+    GitHub Actions runs on `v<version>` tags, checks that the tag matches the project version, creates the GitHub release for that tag, and uploads the plugin ZIP to that release and the QGIS registry. The plugin metadata and ZIP filename keep the unprefixed version, such as `0.400.0`.
+
+### QGIS registry token for GitHub Actions
+
+The release workflow requires a token for uploading plugin versions to the QGIS plugin registry:
+
+1. Sign in to the [QGIS plugin registry](https://plugins.qgis.org/) with an account allowed to manage the plugin. The plugin must already be registered.
+2. Open the plugin page and append `tokens/create/` to its URL (`https://plugins.qgis.org/plugins/<package_name>/tokens/create/`). Create a plugin-specific token and copy its value.
+3. In this GitHub repository, open **Settings > Secrets and variables > Actions > New repository secret**. Set the name to `QGIS_PLUGIN_TOKEN`, paste the token into **Secret**, and click **Add secret**.
+
+The workflow passes `secrets.QGIS_PLUGIN_TOKEN` to `qgis-plugin-ci` with `--qgis-token`.
