@@ -16,7 +16,7 @@ from qgis.PyQt.QtGui import QAction
 from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QMenu, QMessageBox
 
 from . import utils
-from .qt_ui import adjust_dialog_to_content, configure_message_box, load_ui
+from .qt_ui import configure_message_box, load_ui, set_dialog_initial_size
 from .raster_io import RasterLoadError, probe_raster_size
 
 
@@ -27,7 +27,7 @@ class FreehandRasterGeoreferencerDialog(QDialog):
     def __init__(self, *, parent):
         QDialog.__init__(self, parent)
         load_ui(self, "freehandrastergeoreferencerdialog.ui")
-        adjust_dialog_to_content(self)
+        set_dialog_initial_size(self)
         self.configure_advanced_menu()
         self.pushButtonAdd.clicked.connect(self.add_new)
         self.pushButtonCancel.clicked.connect(self.reject)
@@ -43,7 +43,6 @@ class FreehandRasterGeoreferencerDialog(QDialog):
 
         self.lineEditImagePath.setText(image_path)
         self.lineEditImagePath.setToolTip(image_path)
-        adjust_dialog_to_content(self)
 
     def show_browser_dialog(self):
         browser_dir, found = QgsProject.instance().readEntry(

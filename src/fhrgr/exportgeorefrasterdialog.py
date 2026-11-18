@@ -13,14 +13,14 @@ import os.path
 
 from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QMessageBox
 
-from .qt_ui import adjust_dialog_to_content, configure_message_box, load_ui
+from .qt_ui import configure_message_box, load_ui, set_dialog_initial_size
 
 
 class ExportGeorefRasterDialog(QDialog):
     def __init__(self, *, parent):
         QDialog.__init__(self, parent)
         load_ui(self, "exportgeorefrasterdialog.ui")
-        adjust_dialog_to_content(self)
+        set_dialog_initial_size(self)
 
         self.pushButtonBrowse.clicked.connect(self.show_browser_dialog)
         self.checkBoxOnlyWorldFile.stateChanged.connect(self.setup_only_world_file)

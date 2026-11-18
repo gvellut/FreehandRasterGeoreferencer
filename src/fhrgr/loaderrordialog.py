@@ -16,7 +16,7 @@ from qgis.PyQt.QtCore import Qt, qDebug
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox
 
 from . import utils
-from .qt_ui import adjust_dialog_to_content, configure_message_box, load_ui
+from .qt_ui import configure_message_box, load_ui, set_dialog_initial_size
 from .raster_io import RasterLoadError, probe_raster_size
 
 
@@ -49,7 +49,7 @@ class LoadErrorDialog(QDialog):
         self.lineEditImagePath.setPlaceholderText("Replacement image path")
         QApplication.setOverrideCursor(Qt.CursorShape.ArrowCursor)
         self.pushButtonBrowse.clicked.connect(self.show_browser_dialog)
-        adjust_dialog_to_content(self, min_text_columns=72)
+        set_dialog_initial_size(self, text_columns=72)
 
     def clear(self):
         self.lineEditImagePath.setText("")

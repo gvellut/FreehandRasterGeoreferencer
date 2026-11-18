@@ -11,7 +11,7 @@
 
 from qgis.PyQt.QtWidgets import QDialog
 
-from .qt_ui import load_ui
+from .qt_ui import load_ui, set_dialog_initial_size
 
 
 class PropertiesDialog(QDialog):
@@ -26,6 +26,7 @@ class PropertiesDialog(QDialog):
 
         self.textEdit_Properties.setText(layer.freehand_metadata())
         self.spinBox_Transparency.setValue(layer.transparency)
+        set_dialog_initial_size(self)
 
     def slider_changed(self, val):
         s = self.spinBox_Transparency

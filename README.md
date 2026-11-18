@@ -60,7 +60,7 @@ Before the first deployment, configure the `QGIS_PLUGIN_TOKEN` repository secret
 
 For each release:
 
-1. Make sure the code to release is on your local `main` branch.
+1. Make sure the code to release is on your local `master` branch.
 2. Set `version` under `[project]` in `pyproject.toml`, for example `0.400.0`. Do not include the `v` prefix. Choose a version whose `v<version>` tag does not already exist, and update the changelog in `src/fhrgr/metadata.txt` for that release.
 3. Copy the project version into the plugin metadata:
  
@@ -76,22 +76,21 @@ For each release:
    uv run task test
    ```
 
-5. Review `git status` and stage all files intended for the release, including new files. Commit the release changes, then push `main`:
+5. Review `git status` and stage all files intended for the release, including new files. Commit the release changes, then push `master`:
 
    ```sh
    git commit -m "Prepare release 0.400.0"
-   git push origin main
+   git push origin master
    git status
    ```
 
-   The working tree must be clean, with local `main` and `origin/main` pointing to the same commit.
+   The working tree must be clean, with local `master` and `origin/master` pointing to the same commit.
 
 6. Start deployment:
 
    ```sh
    ./deploy.sh
    ```
-
 
     The wrapper reads the version from `pyproject.toml`, creates and pushes an annotated tag such as `v0.400.0`, and watches the release workflow using `~/bin/_deploy/watch_workflow.sh` (use `--nowatch` on machines without the watcher). It refuses to reuse an existing version tag. 
 
