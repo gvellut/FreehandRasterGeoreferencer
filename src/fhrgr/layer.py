@@ -151,12 +151,22 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
                     self.iface.mapCanvas().destinationCrsChanged.disconnect(
                         self.reset_transform_parameters_to_new_crs
                     )
-                except Exception:
-                    pass
+                except (RuntimeError, TypeError) as ex:
+                    QgsMessageLog.logMessage(
+                        f"Could not disconnect the raster CRS change handler: {ex}",
+                        "Freehand raster georeferencer",
+                        Qgis.MessageLevel.Warning,
+                    )
                 try:
-                    QgsProject.instance().disconnect(remove_crs_change_handler)
-                except Exception:
-                    pass
+                    QgsProject.instance().layersRemoved.disconnect(
+                        remove_crs_change_handler
+                    )
+                except (RuntimeError, TypeError) as ex:
+                    QgsMessageLog.logMessage(
+                        f"Could not disconnect the raster layer removal handler: {ex}",
+                        "Freehand raster georeferencer",
+                        Qgis.MessageLevel.Warning,
+                    )
 
         self.iface.mapCanvas().destinationCrsChanged.connect(
             self.reset_transform_parameters_to_new_crs

@@ -96,6 +96,14 @@ For each release:
 
     GitHub Actions runs on `v<version>` tags, checks that the tag matches the project version, creates the GitHub release for that tag, and uploads the plugin ZIP to that release and the QGIS registry. The plugin metadata and ZIP filename keep the unprefixed version, such as `0.400.0`.
 
+### Delete the last release before retrying a submission to the QGIS registry
+
+To remove the most recently created GitHub release:
+
+```sh
+./last-release-delete.sh
+```
+
 ### QGIS registry token for GitHub Actions
 
 The release workflow requires a token for uploading plugin versions to the QGIS plugin registry:

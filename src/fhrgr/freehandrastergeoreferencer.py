@@ -11,7 +11,7 @@
 
 import os.path
 
-from qgis.core import Qgis, QgsApplication, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsMessageLog, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QAction, QIcon
 from qgis.PyQt.QtWidgets import QDialog, QDoubleSpinBox
@@ -40,6 +40,7 @@ class FreehandRasterGeoreferencer:
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
         self.layers = {}
+        self.layer = None
         QgsProject.instance().layerRemoved.connect(self.layer_removed)
         self.iface.currentLayerChanged.connect(self.current_layer_changed)
 
@@ -235,6 +236,19 @@ class FreehandRasterGeoreferencer:
 
     def check_current_layer_is_plugin_layer(self):
         layer = self.iface.activeLayer()
+        # self.layer is the previously selected layer. If it was a plugin layer,
+        # disconnect only the rotation spin box handler before changing selection.
+        if self.layer is not None:
+            try:
+                self.layer.transform_parameters_changed.disconnect(
+                    self.spin_box_rotate_update
+                )
+            except (RuntimeError, TypeError) as ex:
+                QgsMessageLog.logMessage(
+                    f"Could not disconnect the previous raster rotation handler: {ex}",
+                    "Freehand raster georeferencer",
+                    Qgis.MessageLevel.Warning,
+                )
         if (
             layer
             and layer.type() == Qgis.LayerType.Plugin
@@ -250,12 +264,6 @@ class FreehandRasterGeoreferencer:
             self.actionExport.setEnabled(True)
             self.spinBoxRotate.setEnabled(True)
             self.spin_box_rotate_value_set_value(layer.rotation)
-            try:
-                # self.layer is the previously selected layer
-                # in case it was a FRGR layer, disconnect the spinBox
-                self.layer.transform_parameters_changed.disconnect()
-            except Exception:
-                pass
             layer.transform_parameters_changed.connect(self.spin_box_rotate_update)
             self.dialogAddLayer.toolButtonAdvanced.setEnabled(True)
             self.actionUndo.setEnabled(True)
@@ -275,10 +283,6 @@ class FreehandRasterGeoreferencer:
             self.actionExport.setEnabled(False)
             self.spinBoxRotate.setEnabled(False)
             self.spin_box_rotate_value_set_value(0)
-            try:
-                self.layer.transform_parameters_changed.disconnect()
-            except Exception:
-                pass
             self.dialogAddLayer.toolButtonAdvanced.setEnabled(False)
             self.actionUndo.setEnabled(False)
             self.layer = None
