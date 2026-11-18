@@ -31,6 +31,12 @@ from .layer import (
     FreehandRasterGeoreferencerLayer,
     FreehandRasterGeoreferencerLayerType,
 )
+from .reload_state import (
+    capture_reload_state,
+    restore_reload_state,
+    store_reload_state,
+    take_reload_state,
+)
 
 
 class FreehandRasterGeoreferencer:
@@ -44,6 +50,8 @@ class FreehandRasterGeoreferencer:
         self._gui_ready = False
 
     def initGui(self):
+        reload_state = take_reload_state()
+
         # Create actions
         self.actionAddLayer = QAction(
             QIcon(icon_path("iconAdd.png")),
@@ -197,6 +205,9 @@ class FreehandRasterGeoreferencer:
         self.georef2PTool.setAction(self.actionGeoref2PRaster)
         self.currentTool = None
 
+        # Recreate preserved layers with this instance before enabling callbacks.
+        restore_reload_state(self, reload_state)
+
         # Connect external callbacks only after all their UI objects exist.
         self._gui_ready = True
         QgsProject.instance().layerRemoved.connect(self.layer_removed)
@@ -208,6 +219,9 @@ class FreehandRasterGeoreferencer:
     def unload(self):
         if not self._gui_ready:
             return
+
+        # Capture project and tree state before cleanup changes selection or visibility.
+        reload_state = capture_reload_state(self.iface)
 
         # Stop callbacks before closing dialogs or removing layers can emit signals.
         self._gui_ready = False
@@ -262,6 +276,7 @@ class FreehandRasterGeoreferencer:
         self.toolbar.deleteLater()
         self.toolbar = None
         self.layers.clear()
+        store_reload_state(reload_state)
 
     def layer_removed(self, layer_id):
         if layer_id in self.layers:
