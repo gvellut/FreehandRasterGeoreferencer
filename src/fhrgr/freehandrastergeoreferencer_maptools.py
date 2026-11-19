@@ -622,7 +622,7 @@ class GeorefRasterBy2PointsMapTool(QgsMapToolEmitPoint):
 
         self.rubber_band_origin = QgsRubberBand(self.canvas, Qgis.GeometryType.Point)
         self.rubber_band_origin.setColor(Qt.GlobalColor.red)
-        self.rubber_band_origin.setIcon(QgsRubberBand.ICON_CIRCLE)
+        self.rubber_band_origin.setIcon(QgsRubberBand.IconType.ICON_CIRCLE)
         self.rubber_band_origin.setIconSize(7)
         self.rubber_band_origin.setWidth(2)
 
