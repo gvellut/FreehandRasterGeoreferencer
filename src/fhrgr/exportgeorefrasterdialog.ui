@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Export georeferenced raster</string>
   </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="pathLayout">

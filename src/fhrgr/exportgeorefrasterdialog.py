@@ -34,7 +34,6 @@ class ExportGeorefRasterDialog(QDialog):
 
         default_path, _ = os.path.splitext(layer.filepath)
         self.default_path = default_path + "_georeferenced.png"
-        self.lineEditImagePath.setPlaceholderText(self.default_path)
 
     def setup_only_world_file(self):
         if self.checkBoxOnlyWorldFile.isChecked():

@@ -36,13 +36,8 @@ class FreehandRasterGeoreferencerDialog(QDialog):
 
     def clear(self, layer):
         self.layer = layer
-        if layer is None:
-            image_path = ""
-        else:
-            image_path = layer.filepath
-
-        self.lineEditImagePath.setText(image_path)
-        self.lineEditImagePath.setToolTip(image_path)
+        self.lineEditImagePath.setText("")
+        self.lineEditImagePath.setToolTip("")
 
     def show_browser_dialog(self):
         browser_dir, found = QgsProject.instance().readEntry(

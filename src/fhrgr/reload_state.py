@@ -224,7 +224,7 @@ def restore_reload_state(plugin, state):
                 group = groups[index]
             document = _read_document(saved_node["xml"])
             node = QgsLayerTreeLayer.readXml(
-                document.documentElement().firstChildElement(), project
+                document.documentElement().firstChildElement(), project, context
             )
             if node is None:
                 raise RuntimeError("Could not restore the raster layer tree entry")
