@@ -24,7 +24,7 @@ from qgis.core import (
     QgsProject,
     QgsRectangle,
 )
-from qgis.PyQt.QtCore import QPointF, QRectF, Qt, pyqtSignal, qDebug
+from qgis.PyQt.QtCore import QPointF, QRectF, Qt, pyqtSignal, pyqtSlot, qDebug
 from qgis.PyQt.QtGui import QColor, QPainter, QPen
 from qgis.PyQt.QtWidgets import QDialog
 
@@ -41,6 +41,7 @@ class LayerDefaultSettings:
 class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
     LAYER_TYPE = "FreehandRasterGeoreferencerLayer"
     transform_parameters_changed = pyqtSignal(tuple)
+    _bar_message_requested = pyqtSignal(str, str, object, int)
 
     def __init__(self, plugin, filepath, title, screen_extent):
         QgsPluginLayer.__init__(
@@ -77,6 +78,10 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
         self.error = False
         self.initializing = False
         self.initialized = False
+        # AutoConnection queues render worker messages to the layer's GUI thread.
+        self._bar_message_requested.connect(
+            self._push_bar_message, Qt.ConnectionType.AutoConnection
+        )
         self.initialize_layer(screen_extent)
 
         self.provider = FreehandRasterGeoreferencerLayerProvider(self)
@@ -627,6 +632,10 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
         self.iface.mainWindow().statusBar().showMessage(msg, timeout)
 
     def show_bar_message(self, title, text, level, duration):
+        self._bar_message_requested.emit(title, text, level, duration)
+
+    @pyqtSlot(str, str, object, int)
+    def _push_bar_message(self, title, text, level, duration):
         self.iface.messageBar().pushMessage(title, text, level, duration)
 
     def transparency_changed(self, val):

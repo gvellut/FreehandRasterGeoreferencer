@@ -1,12 +1,10 @@
 """Optional PyQGIS checks for the handoff used by Plugin Reloader."""
 
 import importlib
-import os
 from types import SimpleNamespace
 
 import pytest
 
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("qgis.core")
 pytest.importorskip("osgeo.gdal")
 
@@ -52,18 +50,6 @@ class Interface:
 
     def messageBar(self):
         return SimpleNamespace(pushMessage=lambda *args: self.messages.append(args))
-
-
-@pytest.fixture(scope="module")
-def qgis_application():
-    application = QgsApplication.instance()
-    owned = application is None
-    if owned:
-        application = QgsApplication([], False)
-        application.initQgis()
-    yield application
-    if owned:
-        application.exitQgis()
 
 
 @pytest.fixture
