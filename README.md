@@ -18,6 +18,25 @@ Use the QGIS plugin directory at `src/fhrgr`:
 
 The plugin is QGIS 4-only. QGIS 3 compatibility is not maintained on this branch. A legacy version for QGIS 2 is in the `qgis2` branch.
 
+# Documentation
+
+See http://gvellut.github.io/FreehandRasterGeoreferencer/
+
+# Issues
+
+Report issues at https://github.com/gvellut/FreehandRasterGeoreferencer/issues
+
+# Limitations
+
+- The plugin uses GDAL from the QGIS runtime to read rasters for display. PNG, JPEG, TIFF, PDF, and other raster formats can be loaded when the local QGIS GDAL build includes the matching driver, including formats such as ECW in distributions that ship that support. Very large rasters should still be avoided because the plugin keeps a display image in memory for interactive painting.
+- This georeferencer only supports affine transformations (without shearing) and not the full set of transformation algorithms (including rubbersheeting) the standard QGIS raster georeferencer provides
+- There is limited support for changing CRS: If the CRS of the map changes, you will have to adjust georeferencing of the layer in the new CRS.
+- The raster layer added by this plugin does not have all the capabilities of a normal QGIS raster layer: It is limited to visualization and modification using the provided tools. However, a normal QGIS raster file, along with georerencing information, can be easily exported by the plugin and can be reloaded using the standard "Add Raster" functionality.
+- The display renderer uses deterministic conversion rules rather than the full QGIS raster renderer. Non-Byte data is rescaled to 8-bit for display, color tables and alpha bands are interpreted where present, and extra bands may be ignored with a warning.
+    - If a pixel transformation is performed, the plugin shows a raster-display warning when the raster is opened. When exporting the georeferencing, unless you are fine with the pixel transformation, be sure to check the "Only export world file" in the dialog, then choose the original raster file: In that case, no image data will be exported, just the georeferencing (including rotation).
+- It is also possible to perform the pixel transformation yourself, before opening the raster with the plugin. For example, if you have a 10-band raster with band 5, 3, 6 as RGB, you can use GDAL to export a version of the raster with those bands in the correct order. Make sure the dimensions (width, length) of the raster  stay the same though. Then use that version of the raster for georeferencing with the plugin. Finally, export only the world file and select the original raster. The original raster will then have a world file.
+
+
 # Development
 
 This repository uses [uv](https://docs.astral.sh/uv/) for local tooling.
@@ -56,24 +75,6 @@ runs tests from `src/qgis_tests` against the checkout. Use
 To set the plugin version, edit `version` under `[project]` in `pyproject.toml`, then run `uv run plugin-version sync` to update `src/fhrgr/metadata.txt`. The `uv run task sync-version` task runs the same command.
 
 The package task uses `qgis-plugin-ci` to create a QGIS plugin ZIP from `src/fhrgr` using the version in `pyproject.toml`. The ZIP is written to the repository root as `fhrgr.<version>.zip` and contains the plugin under `FreehandRasterGeoreferencer/`, matching the existing QGIS registry package. The plugin directory includes the required `LICENSE` file. The `.ui` files are loaded at runtime, so no generated `ui_*.py` files are needed.
-
-# Documentation
-
-See http://gvellut.github.io/FreehandRasterGeoreferencer/
-
-# Issues
-
-Report issues at https://github.com/gvellut/FreehandRasterGeoreferencer/issues
-
-# Limitations
-
-- The plugin uses GDAL from the QGIS runtime to read rasters for display. PNG, JPEG, TIFF, PDF, and other raster formats can be loaded when the local QGIS GDAL build includes the matching driver, including formats such as ECW in distributions that ship that support. Very large rasters should still be avoided because the plugin keeps a display image in memory for interactive painting.
-- This georeferencer only supports affine transformations (without shearing) and not the full set of transformation algorithms (including rubbersheeting) the standard QGIS raster georeferencer provides
-- There is limited support for changing CRS: If the CRS of the map changes, you will have to adjust georeferencing of the layer in the new CRS.
-- The raster layer added by this plugin does not have all the capabilities of a normal QGIS raster layer: It is limited to visualization and modification using the provided tools. However, a normal QGIS raster file, along with georerencing information, can be easily exported by the plugin and can be reloaded using the standard "Add Raster" functionality.
-- The display renderer uses deterministic conversion rules rather than the full QGIS raster renderer. Non-Byte data is rescaled to 8-bit for display, color tables and alpha bands are interpreted where present, and extra bands may be ignored with a warning.
-    - If a pixel transformation is performed, the plugin shows a raster-display warning when the raster is opened. When exporting the georeferencing, unless you are fine with the pixel transformation, be sure to check the "Only export world file" in the dialog, then choose the original raster file: In that case, no image data will be exported, just the georeferencing (including rotation).
-- It is also possible to perform the pixel transformation yourself, before opening the raster with the plugin. For example, if you have a 10-band raster with band 5, 3, 6 as RGB, you can use GDAL to export a version of the raster with those bands in the correct order. Make sure the dimensions (width, length) of the raster  stay the same though. Then use that version of the raster for georeferencing with the plugin. Finally, export only the world file and select the original raster. The original raster will then have a world file.
 
 ## Deploy checklist
 
