@@ -1,0 +1,4 @@
+exclude:
+  - package.json
+  - package-lock.json
+  - serve.sh
