@@ -21,6 +21,8 @@ dev = [
     "ruff>=0.17.0",
     "taskipy>=1.14.0",
 ]
+# Staged by setup-qgis-tests for pytest runs in QGIS Desktop's embedded Python.
+qgis-test = ["pytest>=8.4.0"]
 
 [tool.qgis-plugin-ci]
 plugin_path = "src/fhrgr"
@@ -31,12 +33,18 @@ project_slug = "FreehandRasterGeoreferencer"
 lint = "ruff check ."
 format-check = "ruff format --check ."
 test = "pytest"
+setup-qgis-tests = """
+mkdir -p .qgis-test-deps &&
+uv export --locked --only-group qgis-test --no-emit-project --output-file .qgis-test-deps/requirements.txt &&
+uv pip sync --require-hashes --only-binary :all: --python-version 3.12 --target .qgis-test-deps/site-packages .qgis-test-deps/requirements.txt
+"""
 sync-version = "plugin-version sync"
 package = "plugin-version package --allow-uncommitted-changes --disable-submodule-update"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["src/tests"]
+markers = ["qgis_desktop: launches QGIS Desktop on macOS"]
 
 [tool.ruff]
 line-length = 88

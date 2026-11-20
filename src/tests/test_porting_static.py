@@ -1,16 +1,11 @@
 import configparser
 import importlib
-import os
 from pathlib import Path
 import re
-import subprocess
 import sys
-import textwrap
 import tomllib
 import types
 import xml.etree.ElementTree as ET
-
-import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGIN = ROOT / "src" / "fhrgr"
@@ -136,79 +131,3 @@ def test_plugin_dialogs_use_layouts_and_default_font_sizes():
         assert top_level_widget is not None, ui_path
         assert top_level_widget.find("layout") is not None, ui_path
         assert "<pointsize>" not in ui_path.read_text()
-
-
-def test_qgis_dialogs_have_sane_offscreen_size_hints():
-    pytest.importorskip("qgis.PyQt.QtWidgets")
-
-    code = r"""
-import os
-
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-from qgis.PyQt.QtWidgets import QApplication, QWidget
-
-from fhrgr.exportgeorefrasterdialog import ExportGeorefRasterDialog
-from fhrgr.freehandrastergeoreferencerdialog import FreehandRasterGeoreferencerDialog
-from fhrgr.loaderrordialog import LoadErrorDialog
-
-
-app = QApplication.instance() or QApplication([])
-parent = QWidget()
-
-dialogs = [
-    (
-        LoadErrorDialog(
-            "C:/Users/loren/Giant Files/QGIS files/Projects - WLR/"
-            "QGIS only/WLR fresh 220823/E GH Grading snip.PNG",
-            parent=parent,
-        ),
-        ("lblError", "lineEditImagePath", "pushButtonBrowse"),
-    ),
-    (
-        FreehandRasterGeoreferencerDialog(parent=parent),
-        (
-            "lineEditImagePath",
-            "pushButtonBrowse",
-            "toolButtonAdvanced",
-            "pushButtonAdd",
-            "pushButtonCancel",
-        ),
-    ),
-    (
-        ExportGeorefRasterDialog(parent=parent),
-        (
-            "lineEditImagePath",
-            "pushButtonBrowse",
-            "checkBoxRotationMode",
-            "checkBoxOnlyWorldFile",
-        ),
-    ),
-]
-
-for dialog, names in dialogs:
-    dialog.ensurePolished()
-    dialog.adjustSize()
-    assert dialog.sizeHint().width() > 0
-    assert dialog.sizeHint().height() > 0
-    for name in names:
-        widget = getattr(dialog, name)
-        assert widget.sizeHint().width() > 0, name
-        assert widget.sizeHint().height() > 0, name
-
-assert dialogs[0][0].lblError.wordWrap()
-"""
-
-    for scale_factor in ("1", "1.5", "2"):
-        env = os.environ.copy()
-        env["QT_QPA_PLATFORM"] = "offscreen"
-        env["QT_SCALE_FACTOR"] = scale_factor
-        result = subprocess.run(
-            [sys.executable, "-c", textwrap.dedent(code)],
-            check=False,
-            cwd=ROOT / "src",
-            env=env,
-            text=True,
-            capture_output=True,
-        )
-        assert result.returncode == 0, result.stderr

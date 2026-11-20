@@ -1,17 +1,13 @@
-"""Optional PyQGIS checks for delivery of raster layer messages."""
+"""Checks for delivery of raster layer messages inside QGIS Desktop."""
 
 from threading import Thread
 from types import SimpleNamespace
 
 import pytest
+from qgis.core import Qgis
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QThread
 
-pytest.importorskip("qgis.core")
-pytest.importorskip("osgeo.gdal")
-
-from qgis.core import Qgis  # noqa: E402
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QThread  # noqa: E402
-
-from fhrgr import layer as layer_module  # noqa: E402
+from fhrgr import layer as layer_module
 
 
 @pytest.mark.parametrize("destroy_before_delivery", [False, True])

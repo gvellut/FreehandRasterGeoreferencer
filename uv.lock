@@ -238,6 +238,7 @@ dev = [
     { name = "ruff" },
     { name = "taskipy" },
 ]
+qgis-test = [{ name = "pytest" }]
 
 [package.metadata]
 
@@ -249,6 +250,7 @@ dev = [
     { name = "ruff", specifier = ">=0.17.0" },
     { name = "taskipy", specifier = ">=1.14.0" },
 ]
+qgis-test = [{ name = "pytest", specifier = ">=8.4.0" }]
 
 [[package]]
 name = "future"

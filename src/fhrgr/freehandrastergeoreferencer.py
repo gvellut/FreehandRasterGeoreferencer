@@ -36,6 +36,7 @@ from .reload_state import (
     restore_reload_state,
     store_reload_state,
     take_reload_state,
+    unregister_layer_type,
 )
 
 
@@ -265,10 +266,8 @@ class FreehandRasterGeoreferencer:
             FreehandRasterGeoreferencer.PLUGIN_MENU, self.actionAddLayer
         )
 
-        # Unregister plugin layer type
-        QgsApplication.pluginLayerRegistry().removePluginLayerType(
-            FreehandRasterGeoreferencerLayer.LAYER_TYPE
-        )
+        # Unregister the layer type and remove the saved layers from the tree.
+        unregister_layer_type()
 
         # Delete Qt objects explicitly; their main-window parent outlives the plugin.
         for action in self.toolbar.actions():

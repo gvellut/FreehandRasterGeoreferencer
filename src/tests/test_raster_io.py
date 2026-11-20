@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from fhrgr.raster_display import (
     RasterBandData,
@@ -135,30 +134,3 @@ def test_color_table_is_applied():
     assert result.tolist() == [[[1, 2, 3, 255], [4, 5, 6, 128]]]
     assert not was_rescaled
     assert warnings == ["Applied raster color table for display."]
-
-
-def test_optional_gdal_probe_skips_without_gdal(tmp_path):
-    pytest.importorskip("osgeo.gdal")
-
-    from osgeo import gdal
-
-    from fhrgr.raster_io import probe_raster_size
-
-    path = tmp_path / "tiny.tif"
-    dataset = gdal.GetDriverByName("GTiff").Create(str(path), 3, 2, 1, gdal.GDT_Byte)
-    dataset.GetRasterBand(1).WriteArray(np.ones((2, 3), dtype=np.uint8))
-    dataset = None
-
-    assert probe_raster_size(str(path)) == (3, 2)
-
-
-def test_optional_qt_image_skips_without_qgis_pyqt():
-    pytest.importorskip("qgis.PyQt.QtGui")
-
-    from fhrgr.qt_image import qimage_from_display_array
-
-    image = qimage_from_display_array(np.zeros((2, 3, 4), dtype=np.uint8))
-
-    assert image.width() == 3
-    assert image.height() == 2
-    assert image._fhrgr_buffer.shape == (2, 3, 4)

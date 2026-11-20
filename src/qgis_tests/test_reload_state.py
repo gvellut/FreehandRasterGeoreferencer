@@ -1,14 +1,10 @@
-"""Optional PyQGIS checks for the handoff used by Plugin Reloader."""
+"""Checks for the handoff used by Plugin Reloader inside QGIS Desktop."""
 
 import importlib
 from types import SimpleNamespace
 
 import pytest
-
-pytest.importorskip("qgis.core")
-pytest.importorskip("osgeo.gdal")
-
-from qgis.core import (  # noqa: E402
+from qgis.core import (
     Qgis,
     QgsApplication,
     QgsCoordinateReferenceSystem,
@@ -17,10 +13,10 @@ from qgis.core import (  # noqa: E402
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QObject, pyqtSignal  # noqa: E402
-from qgis.PyQt.QtGui import QColor, QImage  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, pyqtSignal
+from qgis.PyQt.QtGui import QColor, QImage
 
-from fhrgr import layer as layer_module, reload_state  # noqa: E402
+from fhrgr import layer as layer_module, reload_state
 
 
 class Canvas(QObject):
@@ -136,12 +132,11 @@ def test_reload_recreates_layers_and_preserves_project_state(plugin, tmp_path):
     # Include project-loaded layers even when the plugin bookkeeping is empty.
     assert plugin.layers == {}
     state = reload_state.capture_reload_state(plugin.iface)
-    QgsApplication.pluginLayerRegistry().removePluginLayerType(
-        original_class.LAYER_TYPE
-    )
+    reload_state.unregister_layer_type()
     reload_state.store_reload_state(state)
     assert project.mapLayer(first_id) is None
     assert project.mapLayer(second_id) is None
+    assert root.findLayer(first_id) is None
 
     # A real reload creates fresh Python classes; no old layer instances survive.
     importlib.reload(layer_module)
@@ -155,6 +150,10 @@ def test_reload_recreates_layers_and_preserves_project_state(plugin, tmp_path):
     QCoreApplication.processEvents()
     assert reload_state._pending_state(project) is not None
     reload_state.restore_reload_state(replacement, pending)
+    # Let any queued registry removals run before checking the restored layers.
+    QCoreApplication.sendPostedEvents(
+        project.layerTreeRegistryBridge(), QEvent.Type.MetaCall
+    )
 
     restored = project.mapLayer(first_id)
     assert type(restored) is layer_module.FreehandRasterGeoreferencerLayer

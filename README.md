@@ -30,7 +30,28 @@ uv run task test
 uv run task package
 ```
 
-Plugin code, tests, and development scripts live in `src/fhrgr`, `src/tests`, and `src/scripts`.
+Plugin code, ordinary tests, and development scripts live in `src/fhrgr`, `src/tests`, and `src/scripts`.
+
+## QGIS Desktop tests on macOS
+
+With QGIS 4 installed, run `uv run task setup-qgis-tests` from the repository root.
+This stages the locked pytest dependencies in the gitignored `.qgis-test-deps/`
+directory. Run the setup again after updating the pytest dependencies in `uv.lock`.
+
+- Run `uv run task test` for the full suite, or `uv run pytest -m qgis_desktop -v -rP`
+  for the QGIS tests and their output. The launcher uses `/Applications/QGIS4.app`
+  by default. Pass `--qgis-app='/Applications/QGIS Preview.app'` to select a
+  different QGIS 4 app bundle.
+- In VS Code, select `.venv/bin/python` as the interpreter, enable pytest, and
+  set `python.testing.pytestArgs` to `["src/tests"]`. To select a different bundle,
+  add `"--qgis-app=/Applications/QGIS Preview.app"` as a single entry in that array.
+
+The full QGIS suite runs offscreen at 1× scale. Two separate launcher tests run
+the dialog layout check at 1.5× and 2×. Each launch uses a temporary profile and
+runs tests from `src/qgis_tests` against the checkout. Use
+`uv run pytest -m 'not qgis_desktop'` to run only the tests that work without QGIS.
+
+## Packaging
 
 To set the plugin version, edit `version` under `[project]` in `pyproject.toml`, then run `uv run plugin-version sync` to update `src/fhrgr/metadata.txt`. The `uv run task sync-version` task runs the same command.
 

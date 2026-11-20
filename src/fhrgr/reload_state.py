@@ -2,6 +2,7 @@
 
 from qgis.core import (
     Qgis,
+    QgsApplication,
     QgsLayerTreeGroup,
     QgsLayerTreeLayer,
     QgsMessageLog,
@@ -79,17 +80,20 @@ def _tree_nodes(group, layer_ids, context, group_path=()):
     return nodes
 
 
+def _plugin_layers(project):
+    return (
+        layer
+        for layer in project.mapLayers().values()
+        if layer.type() == Qgis.LayerType.Plugin
+        and layer.pluginLayerType() == FreehandRasterGeoreferencerLayer.LAYER_TYPE
+    )
+
+
 def capture_reload_state(iface):
     project = QgsProject.instance()
     context = _context(project)
     layers = []
-    for layer in project.mapLayers().values():
-        if (
-            layer.type() != Qgis.LayerType.Plugin
-            or layer.pluginLayerType() != FreehandRasterGeoreferencerLayer.LAYER_TYPE
-        ):
-            continue
-
+    for layer in _plugin_layers(project):
         document = QDomDocument()
         element = document.createElement("maplayer")
         document.appendChild(element)
@@ -137,6 +141,23 @@ def capture_reload_state(iface):
         "layers": layers,
         "nodes": nodes,
     }
+
+
+def unregister_layer_type():
+    project = QgsProject.instance()
+    layer_ids = {layer.id() for layer in _plugin_layers(project)}
+    seen = set()
+    # The snapshot preserves every placement. Keep one node per layer for QGIS
+    # to remove natively, so pruning the others never queues a registry removal.
+    for node in project.layerTreeRoot().findLayers():
+        layer_id = node.layerId()
+        if layer_id in seen:
+            node.parent().removeChildNode(node)
+        elif layer_id in layer_ids:
+            seen.add(layer_id)
+    QgsApplication.pluginLayerRegistry().removePluginLayerType(
+        FreehandRasterGeoreferencerLayer.LAYER_TYPE
+    )
 
 
 def store_reload_state(state):
