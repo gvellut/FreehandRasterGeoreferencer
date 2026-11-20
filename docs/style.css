@@ -1,0 +1,82 @@
+:root {
+  color: #202b26;
+  background: #fff;
+  font:
+    100% / 1.65 system-ui,
+    sans-serif;
+}
+
+main {
+  max-inline-size: 72ch;
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+header {
+  padding-block-end: 1.5rem;
+  border-block-end: 1px solid #d7e0da;
+}
+
+header p {
+  margin-block: 0.25rem;
+  color: #52615a;
+}
+
+section {
+  margin-block-start: 2rem;
+}
+
+h1,
+h2,
+h3 {
+  margin-block: 0 0.75em;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+h2 {
+  font-size: 1.6rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+p,
+ul,
+figure {
+  margin: 1rem 0;
+}
+
+ul {
+  padding-inline-start: 1.5rem;
+}
+
+li + li {
+  margin-block-start: 0.4rem;
+}
+
+li > ul {
+  margin-block: 0.5rem 0;
+}
+
+a {
+  color: #236247;
+  overflow-wrap: anywhere;
+  text-underline-offset: 0.15em;
+}
+
+img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+figcaption {
+  margin-block-start: 0.5rem;
+  color: #52615a;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Freehand Raster Georeferencer - QGIS plugin for the interactive georeferencing of rasters
+    </title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <h1>Freehand Raster Georeferencer plugin for QGIS</h1>
+        <p>Date: 2018/03/17</p>
+        <p>Plugin version: 0.5.x</p>
+      </header>
+
+      <section>
+        <h2>Source code</h2>
+
+        <p>
+          The source code is on github:
+          <a href="https://github.com/gvellut/FreehandRasterGeoreferencer"
+            >https://github.com/gvellut/FreehandRasterGeoreferencer</a
+          >
+        </p>
+      </section>
+
+      <section>
+        <h2>Install</h2>
+
+        <p>The plugin is compatible with both QGIS 2 and QGIS 3.</p>
+
+        <p>
+          In QGIS, open the &quot;Plugins&quot; &gt; &quot;Manage and install plugin&quot; dialog.
+          Install the &quot;Freehand raster georeferencer&quot; plugin.
+        </p>
+      </section>
+
+      <section>
+        <h2>Usage</h2>
+
+        <p>The plugin installs the following UI elements:</p>
+
+        <ul>
+          <li>
+            An &ldquo;Add raster for interactive georeferencing&rdquo; tool under the
+            &ldquo;Raster&rdquo; &gt; &ldquo;Freehand Raster Georeferencer&rdquo; menu
+          </li>
+          <li>
+            The same functionality is also available in the &ldquo;Manage Layers&rdquo; toolbar
+          </li>
+          <li>
+            A &ldquo;Freehand raster georeferencing&rdquo; toolbar is installed and visible by
+            default. It can be hidden using the corresponding entry in the &ldquo;View&rdquo; &gt;
+            &ldquo;Toolbars&rdquo; menu. This toolbar contains the following tools:
+            <ul>
+              <li>
+                &ldquo;Add raster for interactive georeferencing&rdquo; button (same functionality
+                as what is described above)
+              </li>
+              <li>&ldquo;Move raster&rdquo; (disabled at first)</li>
+              <li>&ldquo;Rotate raster&rdquo; (disabled at first)</li>
+              <li>&ldquo;Scale raster&rdquo; (disabled at first)</li>
+              <li>&ldquo;Adjust sides of raster&rdquo; (disabled at first)</li>
+              <li>&ldquo;Georeference raster with 2 Points&rdquo; &nbsp;(disabled at first)</li>
+              <li>
+                &ldquo;Decrease transparency&rdquo; (shortcut: Alt+Ctrl+B) (disabled at first)
+              </li>
+              <li>
+                &ldquo;Increase transparency&rdquo; (shortcut: Alt+Ctrl+N) (disabled at first)
+              </li>
+              <li>&ldquo;Export raster with world file&rdquo; (disabled at first)</li>
+            </ul>
+          </li>
+        </ul>
+
+        <p>
+          Except for the &ldquo;Add raster for interactive georeferencing&rdquo; tool, which is
+          always active, the tools of the toolbar become active only when a raster added with the
+          &ldquo;Add raster ..&rdquo; tool is selected in the Layers Panel.
+        </p>
+
+        <figure>
+          <img src="images/image5.png" alt="" width="351" />
+          <figcaption>
+            Above, the toolbar with all the tools enabled, in the order described above.
+          </figcaption>
+        </figure>
+
+        <section>
+          <h3>&ldquo;Add a raster for interactive georeferencing&rdquo; tool</h3>
+
+          <figure>
+            <img src="images/image9.png" alt="" width="454" />
+          </figure>
+
+          <p>
+            This tool adds a raster to the map. It uses Qt to read and and manipulate the raster and
+            is therefore limited to the formats supported by that library. Note also that the raster
+            layer added by this tool does not have all the capabilities of a normal QGIS raster
+            layer: It is limited to visualization and modification using the provided tools.
+          </p>
+
+          <p>
+            Click on &ldquo;Browse&hellip;&rdquo; to select a file (JPEG, PNG, TIFF or BMP) and OK
+            to load the raster.
+          </p>
+
+          <p>
+            As a result, a new layer is created in the Table of Content and is displayed on the map
+            canvas.
+          </p>
+
+          <p>
+            When first created, if the image already has some georeferencing information, such as a
+            world file (.jgw, .tfw&hellip; depending on the format), it is used as the initial
+            positioning of the raster:
+          </p>
+
+          <ul>
+            <li>It may include translation, rotation and scaling</li>
+            <li>
+              The freehand georeferencer can then be used to refine the pre-existing georeferencing
+            </li>
+            <li>
+              If the image has some CRS information, such as a .aux.xml file, it is checked against
+              the CRS of the map: If they are the same, nothing special is done; If not, there is a
+              reprojection at load time so that the transformation parameters apply to the CRS of
+              the map (no on-the-fly reprojection). Note that the reprojection has limitations and
+              the result will need adjusting to the new CRS. To avoid it, change the CRS of the map
+              before loading the raster
+            </li>
+            <li>
+              An information message is shown if pre-existing georeferencing parameters are used
+            </li>
+          </ul>
+
+          <p>
+            If there is no georeferencing information, the raster is loaded with the following
+            characteristics:
+          </p>
+
+          <ul>
+            <li>Its center is at the center of the current extent of the map canvas</li>
+            <li>
+              Its scales are the same in both X and Y and are computed so the raster fits in the
+              current extent of the map canvas
+            </li>
+            <li>There is no rotation</li>
+          </ul>
+
+          <p>
+            Properties of the layer can be visualized by double-clicking on the entry in the TOC: A
+            dialog opens where some details about the layer are displayed, including the location of
+            the image file and the transformation parameters that are applied to it (position of the
+            center, scale in X and Y and rotation angle). It is also possible to modify the
+            transparency of the layer: The change of transparency is applied immediately to the
+            raster on the map.
+          </p>
+
+          <figure>
+            <img src="images/image3.png" alt="" width="376" />
+          </figure>
+
+          <p>
+            When a raster layer created with this tool is selected in the TOC, the other tools are
+            enabled and can be used to change the transformation parameters applied to the raster.
+            If modified, those parameters are saved along with the QGS project file.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Move raster&rdquo; tool</h3>
+
+          <figure>
+            <img src="images/image2.png" alt="" width="452" />
+          </figure>
+
+          <p>
+            This tool allows the user to change the center of the raster. To use, select the tool in
+            the toolbar then click on the map canvas and move the mouse while holding the mouse
+            button. This defines a translation vector from the first point clicked to the point
+            where the mouse was released: The center of the canvas will be transformed using this
+            vector.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Rotate raster&rdquo; tool</h3>
+
+          <figure>
+            <img src="images/image4.png" alt="" width="360" />
+          </figure>
+
+          <p>
+            This tool allows the user to change the orientation of the raster. To use, select the
+            tool in the toolbar then click anywhere on the map canvas and move the mouse in the
+            vertical direction (in the coordinate system of the screen): If the mouse moves up, the
+            raster will rotate counter-clockwise around its center. Otherwise, the raster will
+            rotate in a clockwise manner.
+          </p>
+
+          <p>
+            An optional &ldquo;Rotate around point&rdquo; mode is available by using the Ctrl key on
+            Windows and Linux and the Command key (⌘) on Mac OS X, when clicking on the map canvas.
+            In this mode, instead of rotating around the center of the image, the raster will be
+            rotated around the clicked point. The rotation angle will be considered to be 0&deg;
+            when moving directly right of the center of rotation and increasing when moving
+            counterclockwise, up to 360&deg;.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Scale raster&rdquo; tool</h3>
+
+          <figure>
+            <img src="images/image7.png" alt="" width="382" />
+          </figure>
+
+          <p>
+            This tool allows the user to scale the raster independently in both X and Y (in the
+            coordinate system of the raster). To use, select the tool in the toolbar then click
+            anywhere on the map canvas and move the mouse in with the vertical or horizontal
+            direction (in the coordinate system of the screen): If the mouse moves up, the height of
+            the raster is scaled up. Otherwise it is scaled down. It works the same way for the
+            horizontal direction and the width of the raster.
+          </p>
+
+          <p>
+            An optional &ldquo;Uniform scale&rdquo; mode is available by using the Ctrl key on
+            Windows and Linux and the Command key (⌘) on Mac OS X, when clicking on the map canvas.
+            In this mode, only the horizontal direction of the mouse movement is taken into account
+            and the scaling will be identical in both X and Y of the raster.
+          </p>
+
+          <p>
+            If the scale of the raster and its DPI are known (for example, 1:45000 and 200 dpi), a
+            dialog to input this information can be opened by right-clicking on the map canvas while
+            the &ldquo;Scale Raster&rdquo; tool is active. Enter the scale and the dpi, separated
+            with a comma (for example, 45000,200). The scaling factor of the raster will then be
+            reset to a value computed with the data provided, identically in X and Y. Note that the
+            CRS of the map should be a projected system (although no check is performed).
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Adjust sides of raster&rdquo; tool</h3>
+
+          <figure>
+            <img src="images/image6.png" alt="" width="396" />
+          </figure>
+
+          <p>
+            This tool allows the user to adjust the sides of the raster, one at a time. To use,
+            select the tool in the toolbar then click on the map near the side that needs adjusting:
+            The side closest to the click becomes highlighted in bold red. Then move the mouse in
+            the direction of adjustment (depending on the chosen side, vertically or horizontally in
+            the coordinate system of the raster). The chosen side is moved to the new position while
+            the others stay where they are.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Georeference raster with 2 Points&rdquo; tool</h3>
+
+          <figure>
+            <img src="images/image1.png" alt="" width="382" />
+          </figure>
+
+          <p>
+            This took allows the user to combine move, rotate and uniform scale to georeference
+            using 2 points that are identified in both the background layers and the raster to
+            georeference. To use, select the tool in the toolbar. Then click on the map canvas on
+            the 1st point of the raster and move it to its location on the map: The raster will move
+            with it, just like what happens with the Move tool. The selected point will stay
+            highlighted in red. Then click on the map canvas on the 2nd point of the raster and move
+            it to its location on the map: This time, the raster will rotate and scale instead of
+            actually moving like with the 1st point.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Decrease transparency&rdquo; tool</h3>
+
+          <p>
+            This tool allows the user to decrease the transparency level of the raster, by increment
+            of 10%.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Increase transparency&rdquo; tool</h3>
+
+          <p>
+            This tool allows the user to increase the transparency level of the raster, by increment
+            of 10%.
+          </p>
+        </section>
+
+        <section>
+          <h3>&ldquo;Export raster with world file&rdquo; tool</h3>
+
+          <p>
+            This tool allows the user to export a version of the raster along with a world file.
+            This raster can then be imported in QGIS or any GIS software that supports
+            georeferencing with world files. When launched, a dialog opens.
+          </p>
+
+          <figure>
+            <img src="images/image8.png" alt="" width="461" />
+          </figure>
+
+          <p>
+            Besides a field for the location of the resulting file, there is a &ldquo;Put rotation
+            in world file&rdquo; option:
+          </p>
+
+          <ul>
+            <li>
+              Since some GIS software do not support rotations in world files, by default (checkbox
+              unchecked), the input image will be modified so that the rotation as well as the
+              scaling factor between the axis are put in the exported image. The world file will
+              then only include the displacement and scaling to world coordinates.
+            </li>
+            <li>
+              If the checkbox is checked, the input image will be exported unmodified (apart from a
+              potential file format change) and the world file will include scaling, displacement
+              and rotation. The result will open in QGIS (although transformed) but may not open in
+              other GIS software
+            </li>
+          </ul>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

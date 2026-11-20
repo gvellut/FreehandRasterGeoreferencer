@@ -1,0 +1,10 @@
+.DS_Store
+*.swp
+/node_modules/
+
+
+*.pyc
+__pycache__
+*.zip
+
+.vscode

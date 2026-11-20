@@ -1,0 +1,10 @@
+{
+  "name": "freehand-raster-georeferencer-docs",
+  "private": true,
+  "scripts": {
+    "format": "oxfmt --write index.html style.css"
+  },
+  "devDependencies": {
+    "oxfmt": "0.78.0"
+  }
+}
